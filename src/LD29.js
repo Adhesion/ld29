@@ -331,10 +331,10 @@ var TitleScreen = me.ScreenObject.extend({
     },
 
     onResetEvent: function() {
-        if( ! this.cta ) {
-            this.background= me.loader.getImage("intro");
-            this.cta = me.loader.getImage("introcta");
-        }
+        this.bg = new me.ImageLayer("title", 800, 600, "title");
+        me.game.world.addChild( this.bg );
+        this.hitenter = new HitEnter( 300, 600 );
+        me.game.world.addChild( this.hitenter );
 
         me.input.bindKey( me.input.KEY.ENTER, "enter", true );
         //me.audio.playTrack( "intro" );
@@ -349,16 +349,6 @@ var TitleScreen = me.ScreenObject.extend({
         me.game.repaint();
     },
 
-    draw: function(context) {
-        context.drawImage( this.background, 0, 0 );
-        this.ctaFlicker++;
-		if( this.ctaFlicker > 20 ) 
-		{
-            context.drawImage( this.cta, 74*4, 138*4 );
-			if( this.ctaFlicker > 40 ) this.ctaFlicker = 0;  
-		}
-    },
-
     onDestroyEvent: function() {
         me.input.unbindKey(me.input.KEY.ENTER);
         me.audio.stopTrack();
@@ -366,6 +356,23 @@ var TitleScreen = me.ScreenObject.extend({
     }
 });
 
+var HitEnter = me.Renderable.extend({
+    init: function( x, y ) {
+        this.parent( );
+        this.cta = me.loader.getImage("introcta");
+        this.floating = true;
+        this.z = 1;
+    },
+
+    draw: function(context) {
+        this.ctaFlicker++;
+        if( this.ctaFlicker > 20 )
+        {
+            context.drawImage( this.cta, 74*4, 138*4 );
+            if( this.ctaFlicker > 40 ) this.ctaFlicker = 0;
+        }
+    }
+});
 
 var GameOverScreen = me.ScreenObject.extend(
 {
@@ -376,25 +383,12 @@ var GameOverScreen = me.ScreenObject.extend(
         this.font = new me.BitmapFont("32x32_font", 32);
         this.font.set( "left" );
     },
-    
+
     onResetEvent: function()
     {
         me.input.bindKey( me.input.KEY.ENTER, "enter", true );
-        if ( !this.background )
-        {
-            if( me.game.goodEnding )
-            {
-                this.background = me.loader.getImage( "gameover_good" );
-                me.audio.stopTrack();
-                me.audio.playTrack( "intro" );
-            }
-            else
-            {
-                this.background = me.loader.getImage( "gameover" );
-                me.audio.stopTrack();
-                me.audio.play( "badend" );
-            }
-        }
+        this.gameover = new me.ImageLayer("gameover", 800, 600, "gameover");
+        me.game.world.addChild( this.gameover );
     },
 
     update: function()
@@ -405,11 +399,6 @@ var GameOverScreen = me.ScreenObject.extend(
         }
 
         return this.parent();
-    },
-    
-    draw: function( context, x, y )
-    {
-        context.drawImage( this.background, 0, 0 );
     }
 });
 
