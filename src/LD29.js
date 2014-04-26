@@ -19,10 +19,10 @@ var jsApp = {
         me.state.set( me.state.PLAY, new PlayScreen() );
         me.state.set( me.state.GAMEOVER, new GameOverScreen() );
 
-        me.state.change( me.state.INTRO );
+        //me.state.change( me.state.INTRO );
         //me.state.change( me.state.MENU );
         //me.state.change( me.state.GAMEOVER );
-        //me.state.change( me.state.PLAY );
+        me.state.change( me.state.PLAY );
         //me.debug.renderHitBox = false;
 
         //me.entityPool.add( "player", Player );
@@ -78,7 +78,7 @@ var Word = me.ObjectEntity.extend({
 
         // Text starts as the full string then gets manipulated into the "typed"
         // string.
-        this.fullText = args.text
+        this.fullText = args.text;
         this.untypedText = this.fullText;
         this.typedText = "";
         this.typedOffset = 0;
@@ -304,14 +304,13 @@ var BackgroundScroll = me.Renderable.extend({
     {
         // draw 2 backgrounds to scroll properly
         context.drawImage( this.backgroundImg, 0 - this.xCounter, 0 );
-        // TODO should use image size here
-        context.drawImage( this.backgroundImg, 0 - this.xCounter + 800, 0 );
+        context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, 0 );
     },
 
     updateScroll: function()
     {
         this.xCounter++;
-        if( this.xCounter > 1200 ) {
+        if( this.xCounter > this.backgroundImg.width ) {
             this.xCounter = 0;
         }
 
