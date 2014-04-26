@@ -330,9 +330,9 @@ var TitleScreen = me.ScreenObject.extend({
     },
 
     onResetEvent: function() {
-        this.bg = new me.ImageLayer("title", 800, 600, "title");
+        this.bg = new me.ImageLayer( "title", 800, 600, "title", 1 );
         me.game.world.addChild( this.bg );
-        this.hitenter = new HitEnter( 300, 600 );
+        this.hitenter = new HitEnter( 300, 300 );
         me.game.world.addChild( this.hitenter );
 
         //me.audio.playTrack( "intro" );
