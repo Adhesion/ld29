@@ -44,10 +44,25 @@ var PlayScreen = me.ScreenObject.extend(
         // me.game.HUD.addItem( "hp", new HPDisplay( 700, 10 ) );
         // Some HUD shit here?
 
-        this.scroller = new BackgroundScroll( 0, 800, 600 );
+        this.skyScroll = new BackgroundScroll({
+            width: 800,
+            height: 600,
+            image: 'bg_sky',
+            speed: 0.08,
+            z: 0
+        });
+
+        this.wallScroll = new BackgroundScroll({
+            width: 800,
+            height: 600,
+            image: 'bg_wall',
+            speed: 0.1,
+            z: 1
+        });
         this.wordSpawn = new WordSpawn( 800, 600 );
 
-        me.game.world.addChild( this.scroller );
+        me.game.world.addChild( this.skyScroll );
+        me.game.world.addChild( this.wallScroll );
         me.game.world.addChild( this.wordSpawn );
     },
 
@@ -417,16 +432,18 @@ var WordSpawn = me.ObjectEntity.extend({
 });
 
 var BackgroundScroll = me.Renderable.extend({
-    init: function( pos, width, height )
+    init: function( args )
     {
-        this.parent( pos, width, height );
+        this.parent( 0, args.width, args.height );
         this.xCounter = 0;
 
         this.floating = true;
+        this.speed = args.speed;
+        this.z = args.z;
 
         if ( !this.backgroundImg )
         {
-            this.backgroundImg = me.loader.getImage( "title_bg" );
+            this.backgroundImg = me.loader.getImage( args.image );
         }
     },
 
@@ -437,9 +454,9 @@ var BackgroundScroll = me.Renderable.extend({
         context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, 0 );
     },
 
-    updateScroll: function()
+    updateScroll: function( dt )
     {
-        this.xCounter++;
+        this.xCounter += this.speed * dt;
         if( this.xCounter > this.backgroundImg.width ) {
             this.xCounter = 0;
         }
@@ -449,7 +466,7 @@ var BackgroundScroll = me.Renderable.extend({
 
     update: function( dt )
     {
-        this.updateScroll();
+        this.updateScroll( dt );
     }
 });
 

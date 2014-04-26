@@ -12,6 +12,8 @@ var GameResources = [
     { name: "radmarslogo",     type: "audio", src: "data/", channels: 2     },
 
     { name: "title_bg", type: "image", src: "data/title_bg.png" },
+    { name: "bg_sky", type: "image", src: "data/bg_sky.png" },
+    { name: "bg_wall", type: "image", src: "data/bg_wall.png" },
     { name: "title", type: "image", src: "data/title_temp.png" },
     { name: "introcta", type: "image", src: "data/introcta.png" },
     { name: "gameover", type: "image", src: "data/gameover_temp.png" },
