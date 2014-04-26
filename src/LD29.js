@@ -19,10 +19,10 @@ var jsApp = {
         me.state.set( me.state.PLAY, new PlayScreen() );
         me.state.set( me.state.GAMEOVER, new GameOverScreen() );
 
-        //me.state.change( me.state.INTRO );
+        me.state.change( me.state.INTRO );
         //me.state.change( me.state.MENU );
         //me.state.change( me.state.GAMEOVER );
-        me.state.change( me.state.PLAY );
+        //me.state.change( me.state.PLAY );
         //me.debug.renderHitBox = false;
 
         //me.entityPool.add( "player", Player );
@@ -327,7 +327,6 @@ var BackgroundScroll = me.Renderable.extend({
 var TitleScreen = me.ScreenObject.extend({
     init: function() {
         this.parent( true );
-        this.ctaFlicker = 0; 
     },
 
     onResetEvent: function() {
@@ -336,41 +335,44 @@ var TitleScreen = me.ScreenObject.extend({
         this.hitenter = new HitEnter( 300, 600 );
         me.game.world.addChild( this.hitenter );
 
-        me.input.bindKey( me.input.KEY.ENTER, "enter", true );
         //me.audio.playTrack( "intro" );
-    },
 
-    update: function() {
-        if( me.input.isKeyPressed('enter')) {
-            me.state.change(me.state.PLAY);
-        }
-
-        // have to force redraw :(
-        me.game.repaint();
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.GAMEOVER );
+            }
+        });
     },
 
     onDestroyEvent: function() {
-        me.input.unbindKey(me.input.KEY.ENTER);
         me.audio.stopTrack();
+        me.game.world.removeChild( this.bg );
+        me.game.world.removeChild( this.hitenter );
+        me.event.unsubscribe( this.subscription );
         //me.audio.play( "ready" );
     }
 });
 
 var HitEnter = me.Renderable.extend({
     init: function( x, y ) {
-        this.parent( );
         this.cta = me.loader.getImage("introcta");
+        this.parent( new me.Vector2d(x,y), this.cta.width, this.cta.height );
         this.floating = true;
-        this.z = 1;
+        this.z = 5;
+        this.ctaFlicker = 0;
     },
 
     draw: function(context) {
         this.ctaFlicker++;
         if( this.ctaFlicker > 20 )
         {
-            context.drawImage( this.cta, 74*4, 138*4 );
+            context.drawImage( this.cta, this.pos.x, this.pos.y );
             if( this.ctaFlicker > 40 ) this.ctaFlicker = 0;
         }
+    },
+
+    update: function(dt) {
+        me.game.repaint();
     }
 });
 
@@ -386,19 +388,20 @@ var GameOverScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        me.input.bindKey( me.input.KEY.ENTER, "enter", true );
         this.gameover = new me.ImageLayer("gameover", 800, 600, "gameover");
         me.game.world.addChild( this.gameover );
+
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.INTRO );
+            }
+        });
     },
 
-    update: function()
-    {
-        if( me.input.isKeyPressed('enter')) {
-            me.audio.stopTrack();
-            me.state.change(me.state.INTRO);
-        }
-
-        return this.parent();
+    onDestroyEvent: function() {
+        me.audio.stopTrack();
+        me.game.world.removeChild( this.gameover );
+        me.event.unsubscribe( this.subscription );
     }
 });
 
@@ -406,12 +409,19 @@ var RadmarsScreen = me.ScreenObject.extend({
     onResetEvent: function() {
         this.radmars = new RadmarsRenderable();
         me.game.world.addChild( this.radmars );
+
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.MENU );
+            }
+        });
     },
 
     onDestroyEvent: function() {
         me.input.unbindKey(me.input.KEY.ENTER);
         me.audio.stopTrack();
         me.game.world.removeChild( this.radmars );
+        me.event.unsubscribe( this.subscription );
     }
 });
 
@@ -457,9 +467,6 @@ var RadmarsRenderable = me.Renderable.extend({
     },
 
     update: function( dt ) {
-        if( me.input.isKeyPressed('enter')) {
-            me.state.change(me.state.MENU);
-        }
         if ( this.counter < 350 ) {
             this.counter++;
         }
