@@ -1,6 +1,6 @@
 var jsApp = {
     onload: function() {
-        if ( !me.video.init( 'canvas', 800, 600, true, 'auto') ) {
+        if ( !me.video.init( 'canvas', 800, 600, true ) ) {
             alert( "Sorry, it appears your browser does not support HTML5." );
             return;
         }
@@ -27,8 +27,6 @@ var jsApp = {
 
         //me.entityPool.add( "player", Player );
         me.pool.register( "wordspawn", WordSpawn );
-
-
     }
 };
 
@@ -71,15 +69,16 @@ var Word = me.ObjectEntity.extend({
     {
         this.parent( args.pos.x, args.pos.y, {} );
         this.font = new me.BitmapFont("16x16_font", 16);
-        this.typedFont = new me.BitmapFont("16x16_font", 16);
+        this.typedFont = new me.BitmapFont("16x16_font_blue", 16);
         this.wordWidth = 0;
+        this.spawner = args.spawner;
 
         this.floating = true; // screen coords
         this.z = 5;
 
         // Text starts as the full string then gets manipulated into the "typed"
         // string.
-        this.fullText = "FLAPPYBIRD";
+        this.fullText = args.text;
         this.untypedText = this.fullText;
         this.typedText = "";
         this.typedOffset = 0;
@@ -88,30 +87,22 @@ var Word = me.ObjectEntity.extend({
     typeLetter: function( letter )
     {
         if( this.untypedText.charAt( 0 ) == letter ) {
-            console.log(" Yay! Got " + letter );
             this.typedText += letter;
             this.untypedText = this.untypedText.substring( 1 );
             this.dirty = true;
         }
-        // TODO: Behavior on miss? Behavior on finish word?
+        return this.untypedText.length;
     },
 
     /* Update position, input, etc. */
     update: function( dt )
     {
         // Move to the left...
-        this.pos.x -= dt / 3;
-
-        // TODO Delete this, its a simulation
-        if( ! this.simulation || this.simulation > 500 ) {
-            this.typeLetter( String.fromCharCode( Math.floor(Math.random() * 26 ) + 55 ) ); // a random A-Z char
-        }
-        this.simulation += dt;
+        this.pos.x -= dt / 6;
 
         // TODO is this needed ultimately?
         if( this.pos.x + this.wordWidth < 0 ) {
-            // TODO: PLayScreen.removeWord?
-            me.game.world.removeChild( this );
+            this.spawner.removeWord( this );
         }
     },
 
@@ -131,7 +122,7 @@ var Word = me.ObjectEntity.extend({
             this.dirty = false;
         }
 
-        this.font.draw(
+        this.typedFont.draw(
             context,
             this.typedText,
             this.pos.x,
@@ -165,8 +156,92 @@ var WordSpawn = me.ObjectEntity.extend({
         this.locationTimer = 0;
 
         this.font = new me.BitmapFont("16x16_font", 16);
+
+        // Turn some text into some arrays.
+        var rawPhrases = [
+            'I LOVE FLAPPYBIRD',
+            'KEEP ON FLAPPIN',
+            'FLAPPING HARD',
+            'YOUR MOM CANT FLAP',
+            'GET ME MORE FLAPPING BIRDS'
+        ];
+
+        this.phrases = rawPhrases.map(function( phrase ) {
+            return phrase.split( /\s+/ );
+        });
+        this.startNewPhrase();
+
+        this.activeWords = [];
+        this.currentWord = undefined;
+
+        // set up input handling for lower and upper case keys
+        for(var c = 65; c <= 90; c++ ) {
+            var ch = String.fromCharCode(c);
+            me.input.bindKey(me.input.KEY[ch], "type_" + ch);
+            me.input.bindKey(me.input.KEY[ch.toLowerCase()], "type_" + ch);
+        }
+        this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
 
+    /* Remove activeWord. */
+    removeWord: function( word )
+    {
+        me.game.world.removeChild( word );
+        if( this.currentWord == word ) {
+            this.setNextActive();
+        }
+    },
+
+    /* Update the active word on the screen */
+    setNextActive: function() {
+        this.currentWord = this.activeWords.shift();
+    },
+
+    keyDown: function( action ) {
+        if( action ) {
+            var ch = action.match(/type_(\S)/);
+            if( this.currentWord && ch ) {
+                var charsLeft = this.currentWord.typeLetter( ch[1] );
+                if( charsLeft == 0 ) {
+                    this.removeWord( this.currentWord );
+                }
+            }
+        }
+    },
+
+    /* Clean up event handler */
+    onDestroyEvent: function() {
+        me.event.unsubscribe(this.subscription);
+        for( var c = 65; c <= 90; c++ ) {
+            me.input.unbindKey(me.input.KEY[c]);
+        }
+    },
+
+
+    /** Restart the phrase tracking. */
+    startNewPhrase: function()
+    {
+        this.currentPhrase = this.randomPhrase();
+        this.currentWordIndex = 0;
+    },
+
+    /** Get the next word in the phrase or start a new prhase if we're at the
+     * end. */
+    nextWord: function()
+    {
+        if( this.currentPhrase.length < this.currentWordIndex + 1 ) {
+            this.startNewPhrase();
+        }
+        return this.currentPhrase[this.currentWordIndex++];
+    },
+
+    /** Return a random phrase. */
+    randomPhrase: function()
+    {
+        return this.phrases[Math.floor(Math.random() * this.phrases.length)];
+    },
+
+    /* Move the spawn point, spawn a word. */
     update: function( dt )
     {
         this.locationTimer += dt;
@@ -184,9 +259,16 @@ var WordSpawn = me.ObjectEntity.extend({
     {
         // TODO: global tracking
         var word = new Word({
+            text: this.nextWord(),
             pos: this.pos,
-            word: "FLAPPY",
+            spawner: this,
         });
+        if( ! this.currentWord ) {
+            this.currentWord = word
+        }
+        else {
+            this.activeWords.push( word );
+        }
         me.game.world.addChild(word);
         me.game.world.sort();
     },
@@ -222,13 +304,13 @@ var BackgroundScroll = me.Renderable.extend({
     {
         // draw 2 backgrounds to scroll properly
         context.drawImage( this.backgroundImg, 0 - this.xCounter, 0 );
-        context.drawImage( this.backgroundImg, 0 - this.xCounter + 1200, 0 );
+        context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, 0 );
     },
 
     updateScroll: function()
     {
         this.xCounter++;
-        if( this.xCounter > 1200 ) {
+        if( this.xCounter > this.backgroundImg.width ) {
             this.xCounter = 0;
         }
 
@@ -244,45 +326,54 @@ var BackgroundScroll = me.Renderable.extend({
 var TitleScreen = me.ScreenObject.extend({
     init: function() {
         this.parent( true );
-        this.ctaFlicker = 0; 
     },
 
     onResetEvent: function() {
-        if( ! this.cta ) {
-            this.background= me.loader.getImage("intro");
-            this.cta = me.loader.getImage("introcta");
-        }
+        this.bg = new me.ImageLayer( "title", 800, 600, "title", 1 );
+        me.game.world.addChild( this.bg );
+        this.hitenter = new HitEnter( 300, 300 );
+        me.game.world.addChild( this.hitenter );
 
-        me.input.bindKey( me.input.KEY.ENTER, "enter", true );
         //me.audio.playTrack( "intro" );
-    },
 
-    update: function() {
-        if( me.input.isKeyPressed('enter')) {
-            me.state.change(me.state.PLAY);
-        }
-
-        // have to force redraw :(
-        me.game.repaint();
-    },
-
-    draw: function(context) {
-        context.drawImage( this.background, 0, 0 );
-        this.ctaFlicker++;
-		if( this.ctaFlicker > 20 ) 
-		{
-            context.drawImage( this.cta, 74*4, 138*4 );
-			if( this.ctaFlicker > 40 ) this.ctaFlicker = 0;  
-		}
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.GAMEOVER );
+            }
+        });
     },
 
     onDestroyEvent: function() {
-        me.input.unbindKey(me.input.KEY.ENTER);
         me.audio.stopTrack();
+        me.game.world.removeChild( this.bg );
+        me.game.world.removeChild( this.hitenter );
+        me.event.unsubscribe( this.subscription );
         //me.audio.play( "ready" );
     }
 });
 
+var HitEnter = me.Renderable.extend({
+    init: function( x, y ) {
+        this.cta = me.loader.getImage("introcta");
+        this.parent( new me.Vector2d(x,y), this.cta.width, this.cta.height );
+        this.floating = true;
+        this.z = 5;
+        this.ctaFlicker = 0;
+    },
+
+    draw: function(context) {
+        this.ctaFlicker++;
+        if( this.ctaFlicker > 20 )
+        {
+            context.drawImage( this.cta, this.pos.x, this.pos.y );
+            if( this.ctaFlicker > 40 ) this.ctaFlicker = 0;
+        }
+    },
+
+    update: function(dt) {
+        me.game.repaint();
+    }
+});
 
 var GameOverScreen = me.ScreenObject.extend(
 {
@@ -293,40 +384,23 @@ var GameOverScreen = me.ScreenObject.extend(
         this.font = new me.BitmapFont("32x32_font", 32);
         this.font.set( "left" );
     },
-    
+
     onResetEvent: function()
     {
-        me.input.bindKey( me.input.KEY.ENTER, "enter", true );
-        if ( !this.background )
-        {
-            if( me.game.goodEnding )
-            {
-                this.background = me.loader.getImage( "gameover_good" );
-                me.audio.stopTrack();
-                me.audio.playTrack( "intro" );
+        this.gameover = new me.ImageLayer("gameover", 800, 600, "gameover");
+        me.game.world.addChild( this.gameover );
+
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.INTRO );
             }
-            else
-            {
-                this.background = me.loader.getImage( "gameover" );
-                me.audio.stopTrack();
-                me.audio.play( "badend" );
-            }
-        }
+        });
     },
 
-    update: function()
-    {
-        if( me.input.isKeyPressed('enter')) {
-            me.audio.stopTrack();
-            me.state.change(me.state.INTRO);
-        }
-
-        return this.parent();
-    },
-    
-    draw: function( context, x, y )
-    {
-        context.drawImage( this.background, 0, 0 );
+    onDestroyEvent: function() {
+        me.audio.stopTrack();
+        me.game.world.removeChild( this.gameover );
+        me.event.unsubscribe( this.subscription );
     }
 });
 
@@ -334,12 +408,19 @@ var RadmarsScreen = me.ScreenObject.extend({
     onResetEvent: function() {
         this.radmars = new RadmarsRenderable();
         me.game.world.addChild( this.radmars );
+
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.MENU );
+            }
+        });
     },
 
     onDestroyEvent: function() {
         me.input.unbindKey(me.input.KEY.ENTER);
         me.audio.stopTrack();
         me.game.world.removeChild( this.radmars );
+        me.event.unsubscribe( this.subscription );
     }
 });
 
@@ -385,9 +466,6 @@ var RadmarsRenderable = me.Renderable.extend({
     },
 
     update: function( dt ) {
-        if( me.input.isKeyPressed('enter')) {
-            me.state.change(me.state.MENU);
-        }
         if ( this.counter < 350 ) {
             this.counter++;
         }
@@ -400,5 +478,11 @@ var RadmarsRenderable = me.Renderable.extend({
 });
 
 window.onReady( function() {
+    document.addEventListener('keydown', function(e) {
+        if(e.keyCode == 8) {
+            e.preventDefault();
+        }
+    });
+
     jsApp.onload();
 });
