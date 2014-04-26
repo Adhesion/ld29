@@ -1,6 +1,6 @@
 var jsApp = {
     onload: function() {
-        if ( !me.video.init( 'canvas', 800, 600, true, 'auto') ) {
+        if ( !me.video.init( 'canvas', 800, 600, true ) ) {
             alert( "Sorry, it appears your browser does not support HTML5." );
             return;
         }
@@ -71,6 +71,7 @@ var Word = me.ObjectEntity.extend({
         this.font = new me.BitmapFont("16x16_font", 16);
         this.typedFont = new me.BitmapFont("16x16_font_blue", 16);
         this.wordWidth = 0;
+        this.spawner = args.spawner;
 
         this.floating = true; // screen coords
         this.z = 5;
@@ -101,8 +102,7 @@ var Word = me.ObjectEntity.extend({
 
         // TODO is this needed ultimately?
         if( this.pos.x + this.wordWidth < 0 ) {
-            // TODO: PLayScreen.removeWord?
-            me.game.world.removeChild( this );
+            this.spawner.removeWord( this );
         }
     },
 
@@ -183,12 +183,28 @@ var WordSpawn = me.ObjectEntity.extend({
         this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
 
+    /* Remove activeWord. */
+    removeWord: function( word )
+    {
+        me.game.world.removeChild( word );
+        if( this.currentWord == word ) {
+            this.setNextActive();
+        }
+    },
+
+    /* Update the active word on the screen */
+    setNextActive: function() {
+        this.currentWord = this.activeWords.shift();
+    },
+
     keyDown: function( action ) {
-        var ch = action.match(/type_(\S)/);
-        if( ch ) {
-            var charsLeft = this.currentWord.typeLetter( ch[1] );
-            if( charsLeft == 0 ) {
-                this.currentWord = this.activeWords.pop();
+        if( action ) {
+            var ch = action.match(/type_(\S)/);
+            if( this.currentWord && ch ) {
+                var charsLeft = this.currentWord.typeLetter( ch[1] );
+                if( charsLeft == 0 ) {
+                    this.removeWord( this.currentWord );
+                }
             }
         }
     },
@@ -245,6 +261,7 @@ var WordSpawn = me.ObjectEntity.extend({
         var word = new Word({
             text: this.nextWord(),
             pos: this.pos,
+            spawner: this,
         });
         if( ! this.currentWord ) {
             this.currentWord = word
@@ -466,5 +483,11 @@ var RadmarsRenderable = me.Renderable.extend({
 });
 
 window.onReady( function() {
+    document.addEventListener('keydown', function(e) {
+        if(e.keyCode == 8) {
+            e.preventDefault();
+        }
+    });
+
     jsApp.onload();
 });
