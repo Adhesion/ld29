@@ -59,6 +59,52 @@ var PlayScreen = me.ScreenObject.extend(
     }
 });
 
+var Attack = me.ObjectEntity.extend({
+    init: function( args ) {
+        this.parent( args.x, args.y, {} );
+        this.font = new me.BitmapFont("16x16_font", 16);
+        this.selectedFont = new me.BitmapFont("16x16_font_blue", 16);
+        this.index = args.index;
+        this.name = args.name;
+        this.text = "" + this.index + " - " + args.name;
+        this.action = args.action;
+        this.player = args.player;
+        this.boss = args.boss;
+
+        this.floating = true;
+        this.z = 5;
+
+    },
+
+    update: function(dt) {
+        if(this.selected) {
+            this.timer += dt;
+        }
+
+        if( this.timer > 3000 ) {
+            me.game.world.removeChild(this);
+        }
+    },
+
+    select: function() {
+        this.selected = true;
+        this.timer = 0;
+    },
+
+    onDestroyEvent: function() {
+    },
+
+    draw: function(context) {
+        this[ this.selected ? 'selectedFont' : 'font' ].draw(
+            context,
+            this.text,
+            this.pos.x,
+            this.pos.y
+        );
+    }
+});
+
+
 /** Words fly towards players and have two fonts that they render. One is used
  * as they fly normally, the other is used as it gets typed out replacing the
  * letters.
@@ -147,6 +193,8 @@ var WordSpawn = me.ObjectEntity.extend({
             height: screenHeight - 100,
         };
         this.parent( this.limits.width - 100, 0, {} );
+        this.setAttacking(true);
+        this.attackEnergy = 1;
 
         this.floating = true; // screen coords
         this.z = 5;
@@ -195,6 +243,10 @@ var WordSpawn = me.ObjectEntity.extend({
     /* Update the active word on the screen */
     setNextActive: function() {
         this.currentWord = this.activeWords.shift();
+        // TODO slightly hackish...
+        if( ! this.attacking && ! this.currentWord ) {
+            this.defenseMenu();
+        }
     },
 
     keyDown: function( action ) {
@@ -246,11 +298,13 @@ var WordSpawn = me.ObjectEntity.extend({
     {
         this.locationTimer += dt;
         this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
-        this.timer += dt;
 
-        if( this.timer > 1000 ) {
-            this.timer = 0;
-            this.addWord();
+        if( this.attacking ) {
+            this.timer += dt;
+            if( this.timer > 1000 ) {
+                this.timer = 0;
+                this.addWord();
+            }
        }
     },
 
@@ -269,8 +323,84 @@ var WordSpawn = me.ObjectEntity.extend({
         else {
             this.activeWords.push( word );
         }
+
+        this.attackCount++;
+        if( this.attackCount > this.attackEnergy ) {
+            this.setAttacking(false);
+        }
+
         me.game.world.addChild(word);
         me.game.world.sort();
+    },
+
+    setAttacking: function( attacking ) {
+        this.attacking = attacking;
+        if( this.attacking){
+            this.attackCount = 0;
+        }
+    },
+
+    defenseMenu: function()
+    {
+        // TODO invent some mechanics.
+        var possibleItems = [
+            {
+                name: 'LOVING HUG',
+                action: function( boss, player ) {
+                }
+            },
+            {
+                name: 'LIGHTNING BOLT',
+                action: function( boss, player ) {
+                }
+            },
+            {
+                name: 'POOP SMEAR',
+                action: function( boss, player ) {
+                }
+            }
+        ];
+
+        this.attacks = []
+        for(var i = 1; i <= 3; i++ ) {
+            var item = possibleItems[i-1]; // TODO randomize?
+            var action = new Attack({
+                index: i,
+                boss: this,
+                name: item.name,
+                action: item.action,
+                y: i * 32 + 250,
+                x: 300
+            });
+            this.attacks.push(action);
+            me.game.world.addChild( action );
+        }
+
+        this.attackSub = me.event.subscribe( me.event.KEYDOWN, this.menuInputHandler.bind(this) );
+
+        me.game.world.sort();
+    },
+
+    menuInputHandler: function (action, keyCode) {
+        for( var i = 0; i < this.attacks.length; i ++) {
+            var attack = this.attacks[i];
+            if( keyCode === me.input.KEY['NUM'+attack.index]) {
+                // TODO perform attack here?
+                attack.select();
+
+                // TODO: Delay until after animation completes?
+                this.setAttacking(true);
+
+                me.event.unsubscribe(this.attackSub);
+
+                for( var j = 0; j < this.attacks.length; j ++) {
+                    // Keep the active one on the screen maybe? Or not
+                    if( i != j ) {
+                        me.game.world.removeChild( this.attacks[j] );
+                    }
+                }
+            }
+        }
     },
 
     /* Check if we need to re-calc font-offset and redraw. */
@@ -338,7 +468,7 @@ var TitleScreen = me.ScreenObject.extend({
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
             if( keyCode === me.input.KEY.ENTER ) {
-                me.state.change( me.state.GAMEOVER );
+                me.state.change( me.state.PLAY);
             }
         });
     },
