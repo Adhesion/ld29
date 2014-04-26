@@ -86,25 +86,18 @@ var Word = me.ObjectEntity.extend({
     typeLetter: function( letter )
     {
         if( this.untypedText.charAt( 0 ) == letter ) {
-            console.log(" Yay! Got " + letter );
             this.typedText += letter;
             this.untypedText = this.untypedText.substring( 1 );
             this.dirty = true;
         }
-        // TODO: Behavior on miss? Behavior on finish word?
+        return this.untypedText.length;
     },
 
     /* Update position, input, etc. */
     update: function( dt )
     {
         // Move to the left...
-        this.pos.x -= dt / 3;
-
-        // TODO Delete this, its a simulation
-        if( ! this.simulation || this.simulation > 500 ) {
-            this.typeLetter( String.fromCharCode( Math.floor(Math.random() * 26 ) + 55 ) ); // a random A-Z char
-        }
-        this.simulation += dt;
+        this.pos.x -= dt / 6;
 
         // TODO is this needed ultimately?
         if( this.pos.x + this.wordWidth < 0 ) {
@@ -177,23 +170,53 @@ var WordSpawn = me.ObjectEntity.extend({
             return phrase.split( /\s+/ );
         });
         this.startNewPhrase();
+
+        this.activeWords = [];
+        this.currentWord = undefined;
+
+        // set up input handling for lower and upper case keys
+        for(var c = 65; c <= 90; c++ ) {
+            var ch = String.fromCharCode(c);
+            me.input.bindKey(me.input.KEY[ch], "type_" + ch);
+            me.input.bindKey(me.input.KEY[ch.toLowerCase()], "type_" + ch);
+        }
+        this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
+
+    keyDown: function( action ) {
+        var ch = action.match(/type_(\S)/);
+        if( ch ) {
+            var charsLeft = this.currentWord.typeLetter( ch[1] );
+            if( charsLeft == 0 ) {
+                this.currentWord = this.activeWords.pop();
+            }
+        }
+    },
+
+    /* Clean up event handler */
+    onDestroyEvent: function() {
+        me.event.unsubscribe(this.subscription);
+        for( var c = 65; c <= 90; c++ ) {
+            me.input.unbindKey(me.input.KEY[c]);
+        }
+    },
+
 
     /** Restart the phrase tracking. */
     startNewPhrase: function()
     {
         this.currentPhrase = this.randomPhrase();
-        this.currentWord = 0;
+        this.currentWordIndex = 0;
     },
 
     /** Get the next word in the phrase or start a new prhase if we're at the
      * end. */
     nextWord: function()
     {
-        if( this.currentPhrase.length < this.currentWord + 1 ) {
+        if( this.currentPhrase.length < this.currentWordIndex + 1 ) {
             this.startNewPhrase();
         }
-        return this.currentPhrase[this.currentWord++];
+        return this.currentPhrase[this.currentWordIndex++];
     },
 
     /** Return a random phrase. */
@@ -223,6 +246,12 @@ var WordSpawn = me.ObjectEntity.extend({
             text: this.nextWord(),
             pos: this.pos,
         });
+        if( ! this.currentWord ) {
+            this.currentWord = word
+        }
+        else {
+            this.activeWords.push( word );
+        }
         me.game.world.addChild(word);
         me.game.world.sort();
     },
@@ -258,7 +287,8 @@ var BackgroundScroll = me.Renderable.extend({
     {
         // draw 2 backgrounds to scroll properly
         context.drawImage( this.backgroundImg, 0 - this.xCounter, 0 );
-        context.drawImage( this.backgroundImg, 0 - this.xCounter + 1200, 0 );
+        // TODO should use image size here
+        context.drawImage( this.backgroundImg, 0 - this.xCounter + 800, 0 );
     },
 
     updateScroll: function()
