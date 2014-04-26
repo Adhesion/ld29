@@ -11,6 +11,8 @@ var GameResources = [
     { name: "intro_radmars2", type: "image", src: "data/intro_radmars2.png" },
     { name: "radmarslogo",     type: "audio", src: "data/", channels: 2     },
 
+    { name: "title_bg", type: "image", src: "data/title_bg.png" },
+
     { name: "16x16_font", type: "image", src: "data/16x16_font.png" },
     { name: "32x32_font", type: "image", src: "data/32x32_font.png" },
     { name: "64x64_font", type: "image", src: "data/64x64_font.png" },

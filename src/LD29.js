@@ -1,6 +1,6 @@
 var jsApp = {
     onload: function() {
-        if ( !me.video.init( 'canvas', 800, 600) ) {
+        if ( !me.video.init( 'canvas', 800, 600, true, 'auto') ) {
             alert( "Sorry, it appears your browser does not support HTML5." );
             return;
         }
@@ -22,7 +22,7 @@ var jsApp = {
         //me.state.change( me.state.INTRO );
         //me.state.change( me.state.MENU );
         //me.state.change( me.state.GAMEOVER );
-        //me.state.change( me.state.PLAY );
+        me.state.change( me.state.PLAY );
         //me.debug.renderHitBox = false;
 
         //me.entityPool.add( "player", Player );
@@ -39,20 +39,55 @@ var PlayScreen = me.ScreenObject.extend(
     // this will be called on state change -> this
     onResetEvent: function()
     {
-        me.game.frameCounter = 0;
         //me.game.addHUD( 0, 0, me.video.getWidth(), me.video.getHeight() );
 		//me.game.HUD.addItem( "hp", new HPDisplay( 700, 10 ) );
         // Some HUD shit here?
+
+        this.scroller = new BackgroundScroll( 0, 800, 600 );
+        me.game.world.addChild( this.scroller );
     },
 
     onDestroyEvent: function()
     {
         me.audio.stopTrack();
+        me.game.world.removeChild( this.scroller );
+    }
+});
+
+var BackgroundScroll = me.Renderable.extend({
+    init: function( pos, width, height )
+    {
+        this.parent( pos, width, height );
+        this.xCounter = 0;
+
+        this.floating = true;
+
+        if ( !this.backgroundImg )
+        {
+            this.backgroundImg = me.loader.getImage( "title_bg" );
+        }
     },
 
-    update: function()
+    draw: function( context )
     {
-        me.game.frameCounter++;
+        // draw 2 backgrounds to scroll properly
+        context.drawImage( this.backgroundImg, 0 - this.xCounter, 0 );
+        context.drawImage( this.backgroundImg, 0 - this.xCounter + 1200, 0 );
+    },
+
+    updateScroll: function()
+    {
+        this.xCounter++;
+        if( this.xCounter > 1200 ) {
+            this.xCounter = 0;
+        }
+
+        me.game.repaint();
+    },
+
+    update: function( dt )
+    {
+        this.updateScroll();
     }
 });
 
@@ -127,7 +162,6 @@ var GameOverScreen = me.ScreenObject.extend(
                 me.audio.play( "badend" );
             }
         }
-        this.timeString = "TIME: " + ((me.game.frameCounter/60.0).toFixed(1)).toString();
     },
 
     update: function()
@@ -147,13 +181,26 @@ var GameOverScreen = me.ScreenObject.extend(
 });
 
 var RadmarsScreen = me.ScreenObject.extend({
-    init: function() {
-        this.parent( true );
-        this.counter = 0;
+    onResetEvent: function() {
+        this.radmars = new RadmarsRenderable();
+        me.game.world.addChild( this.radmars );
     },
 
-    onResetEvent: function() {
-        if( ! this.title ) {
+    onDestroyEvent: function() {
+        me.input.unbindKey(me.input.KEY.ENTER);
+        me.audio.stopTrack();
+        me.game.world.removeChild( this.radmars );
+    }
+});
+
+var RadmarsRenderable = me.Renderable.extend({
+    init: function() {
+        this.parent( 0, 800, 600 );
+        this.counter = 0;
+
+        this.floating = true;
+
+        if( !this.title ) {
             this.bg= me.loader.getImage("intro_bg");
             this.glasses1 = me.loader.getImage("intro_glasses1"); // 249 229
             this.glasses2 = me.loader.getImage("intro_glasses2"); // 249 229
@@ -166,20 +213,6 @@ var RadmarsScreen = me.ScreenObject.extend({
 
         me.input.bindKey( me.input.KEY.ENTER, "enter", true );
         me.audio.playTrack( "radmarslogo" );
-    },
-
-    update: function() {
-        if( me.input.isKeyPressed('enter')) {
-            me.state.change(me.state.MENU);
-        }
-        if ( this.counter < 350 ) {
-            this.counter++;
-        }
-        else{
-            me.state.change(me.state.MENU);
-        }
-        // have to force redraw :(
-        me.game.repaint();
     },
 
     draw: function(context) {
@@ -201,9 +234,18 @@ var RadmarsScreen = me.ScreenObject.extend({
         else context.drawImage( this.glasses1, 249+80, 229+60 );
     },
 
-    onDestroyEvent: function() {
-        me.input.unbindKey(me.input.KEY.ENTER);
-        me.audio.stopTrack();
+    update: function( dt ) {
+        if( me.input.isKeyPressed('enter')) {
+            me.state.change(me.state.MENU);
+        }
+        if ( this.counter < 350 ) {
+            this.counter++;
+        }
+        else{
+            me.state.change(me.state.MENU);
+        }
+        // have to force redraw :(
+        me.game.repaint();
     }
 });
 
