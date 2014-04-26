@@ -72,26 +72,76 @@ var Word = me.ObjectEntity.extend({
         this.parent( args.pos.x, args.pos.y, {} );
         this.font = new me.BitmapFont("16x16_font", 16);
         this.typedFont = new me.BitmapFont("16x16_font", 16);
+        this.wordWidth = 0;
+
+        this.floating = true; // screen coords
+        this.z = 5;
+
         // Text starts as the full string then gets manipulated into the "typed"
         // string.
-        this.text = "FLAPPYBIRD";
-        this.typed = "";
+        this.fullText = "FLAPPYBIRD";
+        this.untypedText = this.fullText;
+        this.typedText = "";
         this.typedOffset = 0;
+    },
+
+    typeLetter: function( letter )
+    {
+        if( this.untypedText.charAt( 0 ) == letter ) {
+            console.log(" Yay! Got " + letter );
+            this.typedText += letter;
+            this.untypedText = this.untypedText.substring( 1 );
+            this.dirty = true;
+        }
+        // TODO: Behavior on miss? Behavior on finish word?
     },
 
     /* Update position, input, etc. */
     update: function( dt )
     {
+        // Move to the left...
         this.pos.x -= dt / 3;
+
+        // TODO Delete this, its a simulation
+        if( ! this.simulation || this.simulation > 500 ) {
+            this.typeLetter( String.fromCharCode( Math.floor(Math.random() * 26 ) + 55 ) ); // a random A-Z char
+        }
+        this.simulation += dt;
+
+        // TODO is this needed ultimately?
+        if( this.pos.x + this.wordWidth < 0 ) {
+            // TODO: PLayScreen.removeWord?
+            me.game.world.removeChild( this );
+        }
     },
 
     /* Check if we need to re-calc font-offset and redraw. */
     draw: function( context )
     {
+        // Get the full size of the text.
+        if( this.wordWidth == 0 ) {
+            var metrics = this.font.measureText(context, this.fullText);
+            this.wordWidth = metrics.width;
+        }
+
+        // If we typed we need the new offset for typed text
+        if( this.dirty ) {
+            var metrics = this.font.measureText(context, this.typedText);
+            this.typedOffset = metrics.width;
+            this.dirty = false;
+        }
+
         this.font.draw(
             context,
-            this.text,
+            this.typedText,
             this.pos.x,
+            this.pos.y
+        );
+
+        this.font.draw(
+            context,
+            this.untypedText,
+            this.pos.x + this.typedOffset,
             this.pos.y
         );
     }
