@@ -27,8 +27,6 @@ var jsApp = {
 
         //me.entityPool.add( "player", Player );
         me.pool.register( "wordspawn", WordSpawn );
-
-
     }
 };
 
@@ -71,7 +69,7 @@ var Word = me.ObjectEntity.extend({
     {
         this.parent( args.pos.x, args.pos.y, {} );
         this.font = new me.BitmapFont("16x16_font", 16);
-        this.typedFont = new me.BitmapFont("16x16_font", 16);
+        this.typedFont = new me.BitmapFont("16x16_font_blue", 16);
         this.wordWidth = 0;
 
         this.floating = true; // screen coords
@@ -79,7 +77,7 @@ var Word = me.ObjectEntity.extend({
 
         // Text starts as the full string then gets manipulated into the "typed"
         // string.
-        this.fullText = "FLAPPYBIRD";
+        this.fullText = args.text
         this.untypedText = this.fullText;
         this.typedText = "";
         this.typedOffset = 0;
@@ -131,7 +129,7 @@ var Word = me.ObjectEntity.extend({
             this.dirty = false;
         }
 
-        this.font.draw(
+        this.typedFont.draw(
             context,
             this.typedText,
             this.pos.x,
@@ -165,8 +163,46 @@ var WordSpawn = me.ObjectEntity.extend({
         this.locationTimer = 0;
 
         this.font = new me.BitmapFont("16x16_font", 16);
+
+        // Turn some text into some arrays.
+        var rawPhrases = [
+            'I LOVE FLAPPYBIRD',
+            'KEEP ON FLAPPIN',
+            'FLAPPING HARD',
+            'YOUR MOM CANT FLAP',
+            'GET ME MORE FLAPPING BIRDS'
+        ];
+
+        this.phrases = rawPhrases.map(function( phrase ) {
+            return phrase.split( /\s+/ );
+        });
+        this.startNewPhrase();
     },
 
+    /** Restart the phrase tracking. */
+    startNewPhrase: function()
+    {
+        this.currentPhrase = this.randomPhrase();
+        this.currentWord = 0;
+    },
+
+    /** Get the next word in the phrase or start a new prhase if we're at the
+     * end. */
+    nextWord: function()
+    {
+        if( this.currentPhrase.length < this.currentWord + 1 ) {
+            this.startNewPhrase();
+        }
+        return this.currentPhrase[this.currentWord++];
+    },
+
+    /** Return a random phrase. */
+    randomPhrase: function()
+    {
+        return this.phrases[Math.floor(Math.random() * this.phrases.length)];
+    },
+
+    /* Move the spawn point, spawn a word. */
     update: function( dt )
     {
         this.locationTimer += dt;
@@ -184,8 +220,8 @@ var WordSpawn = me.ObjectEntity.extend({
     {
         // TODO: global tracking
         var word = new Word({
+            text: this.nextWord(),
             pos: this.pos,
-            word: "FLAPPY",
         });
         me.game.world.addChild(word);
         me.game.world.sort();
