@@ -26,6 +26,9 @@ var jsApp = {
         //me.debug.renderHitBox = false;
 
         //me.entityPool.add( "player", Player );
+        me.pool.register( "wordspawn", WordSpawn );
+
+
     }
 };
 
@@ -39,19 +42,116 @@ var PlayScreen = me.ScreenObject.extend(
     // this will be called on state change -> this
     onResetEvent: function()
     {
-        //me.game.addHUD( 0, 0, me.video.getWidth(), me.video.getHeight() );
-		//me.game.HUD.addItem( "hp", new HPDisplay( 700, 10 ) );
+        // me.game.addHUD( 0, 0, me.video.getWidth(), me.video.getHeight() );
+        // me.game.HUD.addItem( "hp", new HPDisplay( 700, 10 ) );
         // Some HUD shit here?
 
         this.scroller = new BackgroundScroll( 0, 800, 600 );
+        this.wordSpawn = new WordSpawn( 800, 600 );
+
         me.game.world.addChild( this.scroller );
+        me.game.world.addChild( this.wordSpawn );
     },
 
     onDestroyEvent: function()
     {
         me.audio.stopTrack();
         me.game.world.removeChild( this.scroller );
+        me.game.world.removeChild( this.wordSpawn );
     }
+});
+
+/** Words fly towards players and have two fonts that they render. One is used
+ * as they fly normally, the other is used as it gets typed out replacing the
+ * letters.
+ */
+var Word = me.ObjectEntity.extend({
+    /* Load fonts, etc */
+    init: function( args )
+    {
+        this.parent( args.pos.x, args.pos.y, {} );
+        this.font = new me.BitmapFont("16x16_font", 16);
+        this.typedFont = new me.BitmapFont("16x16_font", 16);
+        // Text starts as the full string then gets manipulated into the "typed"
+        // string.
+        this.text = "FLAPPYBIRD";
+        this.typed = "";
+        this.typedOffset = 0;
+    },
+
+    /* Update position, input, etc. */
+    update: function( dt )
+    {
+        this.pos.x -= dt / 3;
+    },
+
+    /* Check if we need to re-calc font-offset and redraw. */
+    draw: function( context )
+    {
+        this.font.draw(
+            context,
+            this.text,
+            this.pos.x,
+            this.pos.y
+        );
+    }
+});
+
+/** Might be temporary or something, but this is the thing that will spawn
+ * words. */
+var WordSpawn = me.ObjectEntity.extend({
+    init: function( screenWidth, screenHeight ) {
+        this.limits = {
+            width: screenWidth,
+            height: screenHeight - 100,
+        };
+        this.parent( this.limits.width - 100, 0, {} );
+
+        this.floating = true; // screen coords
+        this.z = 5;
+        this.timer = 0;
+
+        // Useless thing. remove it.
+        this.locationTimer = 0;
+
+        this.font = new me.BitmapFont("16x16_font", 16);
+    },
+
+    update: function( dt )
+    {
+        this.locationTimer += dt;
+        this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
+        this.timer += dt;
+
+        if( this.timer > 1000 ) {
+            this.timer = 0;
+            this.addWord();
+       }
+    },
+
+    /** Get the next word from current phrase, add it to screen. */
+    addWord: function()
+    {
+        // TODO: global tracking
+        var word = new Word({
+            pos: this.pos,
+            word: "FLAPPY",
+        });
+        me.game.world.addChild(word);
+        me.game.world.sort();
+    },
+
+    /* Check if we need to re-calc font-offset and redraw. */
+    draw: function( context )
+    {
+        this.font.draw(
+            context,
+            'SPAWN',
+            this.pos.x,
+            this.pos.y
+        );
+    }
+
 });
 
 var BackgroundScroll = me.Renderable.extend({
