@@ -18,6 +18,7 @@ var GameResources = [
     { name: "boss2_1", type: "image", src: "data/boss2_1.png" },
     { name: "boss2_2", type: "image", src: "data/boss2_2.png" },
     { name: "boss2_3", type: "image", src: "data/boss2_3.png" },
+    { name: "boss3_1", type: "image", src: "data/boss3_1.png" },
 
     { name: "player", type: "image", src: "data/player.png" },
     { name: "player_halo", type: "image", src: "data/player_halo.png" },
@@ -39,6 +40,7 @@ var GameResources = [
     { name: "wordchunk4", type: "image", src: "data/wordchunk4.png" },
     { name: "wordchunk5", type: "image", src: "data/wordchunk5.png" },
 
+    { name: "talkscene_bg", type: "image", src: "data/talkscene_bg.png" },
     { name: "title_bg", type: "image", src: "data/title_bg.png" },
     { name: "bg_sky", type: "image", src: "data/bg_sky.png" },
     { name: "bg_wall", type: "image", src: "data/bg_wall.png" },
