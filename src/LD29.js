@@ -10,6 +10,10 @@ var bossData = [
         rawPhrases: [
             'I AM BOSS ONE',
         ],
+        title: [
+            'HI THIS TEXT COMES ON THE ',
+            'SCREEN OR SOMETHING',
+        ],
     },
     {
         bossID: 2,
@@ -23,6 +27,8 @@ var bossData = [
             'YOUR MOM CANT FLAP',
             'GET ME MORE FLAPPING BIRDS',
         ],
+        title: [
+        ],
     },
     {
         bossID: 3,
@@ -35,6 +41,8 @@ var bossData = [
             'FLAPPING HARD',
             'YOUR MOM CANT FLAP',
             'GET ME MORE FLAPPING BIRDS',
+        ],
+        title: [
         ],
     }
 
@@ -893,23 +901,72 @@ var LevelScreen = me.ScreenObject.extend(
         this.parent( true );
         this.font = new me.BitmapFont("32x32_font", 32);
         this.font.set( "left" );
+
     },
 
     onResetEvent: function()
     {
         this.gameover = new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
-        me.game.world.addChild( this.gameover );
+        this.gameover.z = 0;
 
-        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
-            if( keyCode === me.input.KEY.ENTER ) {
-                me.state.change( me.state.PLAY);
-            }
+        this.bossPortrait = new me.ObjectEntity( 500, 100, {
+            image: 'boss' + bossData[nextBoss].bossID + '_1',
+            width: 350,
+            height: 350,
+            spritewidth: 350,
+            spriteheight: 350,
         });
+        this.bossPortrait.renderable.animationpause = true;
+
+        this.bossPortrait.floating = true; // screen coords
+        this.bossPortrait.z = 4;
+
+        this.playerPortrait = new me.ObjectEntity( -10, 100, {
+            image: 'boss3_1',
+            width: 350,
+            height: 350,
+            spritewidth: 350,
+            spriteheight: 350,
+        });
+        this.playerPortrait.renderable.animationpause = true;
+
+        this.playerPortrait.floating = true; // screen coords
+        this.playerPortrait.z = 4;
+        this.playerPortrait.renderable.flipX( true );
+
+        this.textArea = new me.ObjectEntity( 170, 400, {
+            image: 'answer_box',
+            width: 497,
+            height: 121,
+        });
+
+        this.textArea.floating = true; // screen coords
+        this.textArea.z = 5;
+
+        this.levelText = new TitleText({
+            pos: new me.Vector2d( 180, 420 ),
+            text: bossData[nextBoss].title,
+        });
+
+        me.game.world.addChild( this.playerPortrait );
+        me.game.world.addChild( this.bossPortrait );
+        me.game.world.addChild( this.gameover );
+        me.game.world.addChild( this.textArea );
+        me.game.world.addChild( this.levelText );
+
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, (function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                if( !this.levelText.nextLine() ) {
+                    me.state.change( me.state.PLAY);
+                }
+            }
+        }).bind(this));
     },
 
     onDestroyEvent: function() {
         me.audio.stopTrack();
         me.game.world.removeChild( this.gameover );
+        me.game.world.removeChild( this.bossPortrait );
         me.event.unsubscribe( this.subscription );
     }
 });
@@ -1013,6 +1070,42 @@ var RadmarsRenderable = me.Renderable.extend({
         }
         // have to force redraw :(
         me.game.repaint();
+    }
+});
+
+var TitleText = me.ObjectEntity.extend({
+    /* Load fonts, etc */
+    init: function( args )
+    {
+        this.parent( args.pos.x, args.pos.y, {} );
+        this.font = new me.BitmapFont("16x16_font", 16);
+        this.floating = true; // screen coords
+        this.z = 7;
+
+        this.fullText = args.text;
+        this.line = 0;
+    },
+
+    nextLine: function() {
+        if( this.line >= this.fullText.length ) {
+            return false;
+        }
+        this.line += 3;
+        return true;
+    },
+
+    draw: function( context )
+    {
+        for(var i = 0; i < 3; i ++ ) {
+            if( this.fullText[this.line + i] ) {
+                this.font.draw(
+                    context,
+                    this.fullText[this.line + i],
+                    this.pos.x,
+                    this.pos.y + i * 20
+                );
+            }
+        }
     }
 });
 
