@@ -18,6 +18,18 @@ var GameResources = [
     { name: "player", type: "image", src: "data/player.png" },
     { name: "player_halo", type: "image", src: "data/player_halo.png" },
 
+    { name: "", type: "image", src: "data/title_bg.png" },
+    { name: "title_bg", type: "image", src: "data/title_bg.png" },
+    { name: "title_bg", type: "image", src: "data/title_bg.png" },
+
+    { name: "player_hp_back", type: "image", src: "data/player_hp_back.png" },
+    { name: "player_hp_bar", type: "image", src: "data/player_hp_bar.png" },
+    { name: "player_hp_front", type: "image", src: "data/player_hp_front.png" },
+
+    { name: "boss_hp_back", type: "image", src: "data/boss_hp_back.png" },
+    { name: "boss_hp_bar", type: "image", src: "data/boss_hp_bar.png" },
+    { name: "boss_hp_front", type: "image", src: "data/boss_hp_front.png" },
+
     { name: "title_bg", type: "image", src: "data/title_bg.png" },
     { name: "bg_sky", type: "image", src: "data/bg_sky.png" },
     { name: "bg_wall", type: "image", src: "data/bg_wall.png" },

@@ -1,6 +1,9 @@
+var screenHeight = 600;
+var screenWidth = 800;
+
 var jsApp = {
     onload: function() {
-        if ( !me.video.init( 'canvas', 800, 600, true ) ) {
+        if ( !me.video.init( 'canvas', screenWidth, screenHeight, true ) ) {
             alert( "Sorry, it appears your browser does not support HTML5." );
             return;
         }
@@ -43,28 +46,40 @@ var PlayScreen = me.ScreenObject.extend(
         // Some HUD shit here?
 
         this.skyScroll = new BackgroundScroll({
-            width: 800,
-            height: 600,
+            width: screenHeight,
+            height: screenWidth,
             image: 'bg_sky',
             speed: 0.08,
             z: 0
         });
 
         this.wallScroll = new BackgroundScroll({
-            width: 800,
-            height: 600,
+            width: screenHeight,
+            height: screenWidth,
             image: 'bg_wall',
             speed: 0.1,
             z: 1
         });
 
-        this.player = new Player( 600 );
-        this.wordSpawn = new Boss( 800, 600, this.player );
+        this.player = new Player( screenWidth );
+        this.boss = new Boss( this.player );
+
+        this.playerHP = new HPBar({
+            obj: this.player,
+            image: "player",
+        });
+        this.bossHP = new HPBar({
+            obj: this.boss,
+            image: "boss",
+        });
+
 
         me.game.world.addChild( this.skyScroll );
         me.game.world.addChild( this.wallScroll );
-        me.game.world.addChild( this.wordSpawn );
+        me.game.world.addChild( this.boss );
         me.game.world.addChild( this.player );
+        me.game.world.addChild( this.playerHP );
+        me.game.world.addChild( this.bossHP );
     },
 
     onDestroyEvent: function()
@@ -104,7 +119,12 @@ var Attack = me.ObjectEntity.extend({
 
     select: function(boss, player) {
         this.selected = true;
-        player.startAttackAnimation();
+        player.startAttackAnimation( (function() {
+            this.action( this.boss, this.player );
+
+            // boss starts attacking after action is taken
+            this.boss.setAttacking( true );
+        }).bind(this));
         this.timer = 0;
     },
 
@@ -166,7 +186,7 @@ var Word = me.ObjectEntity.extend({
 
         // TODO is this needed ultimately?
         if( this.pos.x + this.wordWidth < 0 ) {
-            this.spawner.removeWord( this );
+            this.spawner.removeWord( this, false );
         }
     },
 
@@ -220,6 +240,8 @@ var Player = me.ObjectEntity.extend({
         this.floating = true; // screen coords
         this.z = 4;
 
+        this.hp = 100;
+
         this.renderable.addAnimation("Floaty", [ 0,1,2,3 ], 100 );
         this.renderable.addAnimation("Damage", [ 4 ], 100 );
         this.renderable.addAnimation("Powerup", [ 5, 6 ], 100 );
@@ -230,7 +252,12 @@ var Player = me.ObjectEntity.extend({
         this.locationTimer = 0;
     },
 
-    startAttackAnimation: function() {
+    hit: function() {
+        this.renderable.setCurrentAnimation("Damage", "Floaty");
+        this.hp -= 10;
+    },
+
+    startAttackAnimation: function( effect ) {
         var powerupFrames = 5;
         var attackFrames = 5;
         var animCallback;
@@ -245,6 +272,8 @@ var Player = me.ObjectEntity.extend({
             }
             else {
                 this.renderable.setCurrentAnimation("Floaty");
+                // Run the attack effect at the end.
+                effect();
             }
         }).bind(this);
 
@@ -259,9 +288,48 @@ var Player = me.ObjectEntity.extend({
     }
 });
 
+var HPBar = me.Renderable.extend({
+    init: function( args ) {
+        this.fromLeft = args.image == "player";
+        this.parent( new me.Vector2d( this.fromLeft ? 11 : screenWidth - 300, screenHeight - 100), 289, 78 );
+        this.obj = args.obj;
+        this.back  = me.loader.getImage( args.image + "_hp_back" );
+        this.bar   = me.loader.getImage( args.image + "_hp_bar" );
+        this.front = me.loader.getImage( args.image + "_hp_front" );
+
+        this.floating = true; // screen coords
+        this.z = 4;
+        this.hp = 0;
+        this.barWidth = 1;
+        this.barHeight = 38;
+    },
+
+    update: function() {
+        if( this.hp != this.obj.hp ) {
+            this.hp = this.obj.hp;
+            this.barWidth = this.hp / 100 * 231;
+            if( this.barWidth <= 0 ) {
+                this.barWidth = 1;
+            }
+        }
+    },
+
+    draw: function( context ) {
+        context.drawImage( this.back, this.pos.x, this.pos.y );
+        context.drawImage(
+            this.bar,
+            0, 0, // sx, sy
+            this.barWidth, this.barHeight, // sw, sh
+            this.pos.x + ( this.fromLeft ? 47 : 243 - this.barWidth ), this.pos.y + 17, // dx, dy
+            this.barWidth, this.barHeight // dw, dh
+        );
+        context.drawImage( this.front, this.pos.x, this.pos.y );
+    }
+});
+
 /** Boss spawns words and shit. */
 var Boss = me.ObjectEntity.extend({
-    init: function( screenWidth, screenHeight, player ) {
+    init: function( player ) {
         var settings = {
             image: 'boss1_healthy',
             width: 350,
@@ -280,6 +348,8 @@ var Boss = me.ObjectEntity.extend({
         this.renderable.addAnimation("Talk", [ 2, 0, 2], 100 );
         this.renderable.addAnimation("Blink", [ 1 ], 100 );
         this.setFloatyAnimation();
+
+        this.hp = 100;
 
         this.setAttacking(true); // start off attacking
         this.attackTimer = 0;
@@ -318,14 +388,22 @@ var Boss = me.ObjectEntity.extend({
         this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
 
+    hit: function( dmg ) {
+        this.hp -= dmg;
+    },
+
     setFloatyAnimation: function() {
         var anim = Math.random() * 10 < 2 ? "Blink" : "Floaty";
         this.renderable.setCurrentAnimation(anim, this.setFloatyAnimation.bind(this) );
     },
 
     /* Remove given word. */
-    removeWord: function( word )
+    removeWord: function( word, completed )
     {
+        if( ! completed ) {
+            this.player.hit();
+        }
+
         me.game.world.removeChild( word );
 
         this.activeWords = this.activeWords.filter( function(e) { return e != word } );
@@ -350,7 +428,7 @@ var Boss = me.ObjectEntity.extend({
             if( this.currentWord && ch ) {
                 var charsLeft = this.currentWord.typeLetter( ch[1] );
                 if( charsLeft == 0 ) {
-                    this.removeWord( this.currentWord );
+                    this.removeWord( this.currentWord, true );
                 }
             }
         }
@@ -451,16 +529,19 @@ var Boss = me.ObjectEntity.extend({
             {
                 name: 'LOVING HUG',
                 action: function( boss, player ) {
+                    boss.hit( 10 );
                 }
             },
             {
                 name: 'LIGHTNING BOLT',
                 action: function( boss, player ) {
+                    boss.hit( 30 );
                 }
             },
             {
                 name: 'POOPY SMEAR',
                 action: function( boss, player ) {
+                    player.hit();
                 }
             }
         ];
@@ -471,6 +552,7 @@ var Boss = me.ObjectEntity.extend({
             var action = new Attack({
                 index: i,
                 boss: this,
+                player: this.player,
                 name: item.name,
                 action: item.action,
                 y: i * 32 + 250,
@@ -491,9 +573,6 @@ var Boss = me.ObjectEntity.extend({
             if( keyCode === me.input.KEY['NUM'+attack.index]) {
                 // TODO perform attack here?
                 attack.select( this, this.player );
-
-                // TODO: Delay until after animation completes?
-                this.setAttacking(true);
 
                 me.event.unsubscribe(this.attackSub);
 
@@ -553,7 +632,7 @@ var TitleScreen = me.ScreenObject.extend({
     },
 
     onResetEvent: function() {
-        this.bg = new me.ImageLayer( "title", 800, 600, "title", 1 );
+        this.bg = new me.ImageLayer( "title", screenHeight, screenWidth, "title", 1 );
         me.game.world.addChild( this.bg );
         this.hitenter = new HitEnter( 300, 300 );
         me.game.world.addChild( this.hitenter );
@@ -611,7 +690,7 @@ var GameOverScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        this.gameover = new me.ImageLayer("gameover", 800, 600, "gameover");
+        this.gameover = new me.ImageLayer("gameover", screenHeight, screenWidth, "gameover");
         me.game.world.addChild( this.gameover );
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
@@ -650,7 +729,7 @@ var RadmarsScreen = me.ScreenObject.extend({
 
 var RadmarsRenderable = me.Renderable.extend({
     init: function() {
-        this.parent( 0, 800, 600 );
+        this.parent( 0, screenHeight, screenWidth );
         this.counter = 0;
 
         this.floating = true;
