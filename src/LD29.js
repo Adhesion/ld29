@@ -848,9 +848,19 @@ var TitleScreen = me.ScreenObject.extend({
 
     onResetEvent: function() {
         this.bg = new me.ImageLayer( "title", screenWidth, screenHeight, "title_bg", 1 );
+        this.logo = new me.ObjectEntity( 250, 434, {
+            image: 'title_title',
+            width: 299,
+            height: 78,
+        });
+        this.logo.floating = true; // screen coords
+        this.logo.z = 4;
+
+        this.hitenter = new HitEnter( 333, 535 );
+
         me.game.world.addChild( this.bg );
-        this.hitenter = new HitEnter( 300, 300 );
         me.game.world.addChild( this.hitenter );
+        me.game.world.addChild( this.logo );
 
         //me.audio.playTrack( "intro" );
 
@@ -901,7 +911,6 @@ var LevelScreen = me.ScreenObject.extend(
         this.parent( true );
         this.font = new me.BitmapFont("32x32_font", 32);
         this.font.set( "left" );
-
     },
 
     onResetEvent: function()
