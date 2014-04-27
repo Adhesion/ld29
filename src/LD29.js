@@ -377,7 +377,9 @@ var Player = me.ObjectEntity.extend({
     hit: function() {
         this.renderable.setCurrentAnimation("Damage", "Floaty");
         this.hp -= 10;
-        if( this.hp < 0 ) {
+        if( this.hp <= 0 ) {
+            // TODO Game reset logic!
+            nextBoss = 0;
             me.state.change( me.state.GAMEOVER );
         }
     },
@@ -562,6 +564,7 @@ var Boss = me.ObjectEntity.extend({
                     me.state.change( me.state.LEVEL_SCREEN);
                 }
                 else {
+                    // TODO Game reset logic!
                     nextBoss = 0;
                     me.state.change( me.state.GAME_OVER);
                 }
@@ -905,7 +908,7 @@ var GameOverScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        this.gameover = new me.ImageLayer("gameover", screenHeight, screenWidth, "gameover");
+        this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight, "gameover");
         me.game.world.addChild( this.gameover );
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
