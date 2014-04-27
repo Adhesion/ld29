@@ -950,8 +950,8 @@ var LevelScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        this.gameover = new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
-        this.gameover.z = 0;
+        this.bg= new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
+        this.bg.z = 0;
 
         this.bossPortrait = new me.ObjectEntity( 500, 100, {
             image: 'boss' + bossData[nextBoss].bossID + '_1',
@@ -994,7 +994,7 @@ var LevelScreen = me.ScreenObject.extend(
 
         me.game.world.addChild( this.playerPortrait );
         me.game.world.addChild( this.bossPortrait );
-        me.game.world.addChild( this.gameover );
+        me.game.world.addChild( this.bg );
         me.game.world.addChild( this.textArea );
         me.game.world.addChild( this.levelText );
 
@@ -1009,7 +1009,7 @@ var LevelScreen = me.ScreenObject.extend(
 
     onDestroyEvent: function() {
         me.audio.stopTrack();
-        me.game.world.removeChild( this.gameover );
+        me.game.world.removeChild( this.bg );
         me.game.world.removeChild( this.bossPortrait );
         me.event.unsubscribe( this.subscription );
     }
