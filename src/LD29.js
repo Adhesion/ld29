@@ -55,7 +55,7 @@ var PlayScreen = me.ScreenObject.extend(
             height: screenWidth,
             image: 'bg_wall',
             speed: 0.1,
-            z: 1
+            z: .5,
         });
 
         this.player = new Player( screenWidth );
@@ -270,11 +270,11 @@ var WordChunk = me.ObjectEntity.extend({
     },
 });
 
-var Shockwave = me.ObjectEntity.extend({
-    init: function( pos )
+var Boom = me.ObjectEntity.extend({
+    init: function( pos, img )
     {
         var settings = {
-            image: 'shockwave',
+            image: img,
             width: 100,
             height: 100,
             spritewidth: 100,
@@ -282,7 +282,7 @@ var Shockwave = me.ObjectEntity.extend({
         }
         this.parent( pos.x - 50, pos.y - 50, settings );
 
-        this.renderable.addAnimation("Floaty", [ 0, 1, 2, 3 ], 100 );
+        this.renderable.addAnimation("Floaty", [ 0, 1, 2, 3 ], 70 );
         this.renderable.setCurrentAnimation("Floaty", (function() {
             me.game.world.removeChild( this );
         }).bind(this));
@@ -368,7 +368,7 @@ var HPBar = me.Renderable.extend({
         this.front = me.loader.getImage( args.image + "_hp_front" );
 
         this.floating = true; // screen coords
-        this.z = 4;
+        this.z = 1;
         this.hp = 0;
         this.barWidth = 1;
         this.barHeight = 38;
@@ -491,7 +491,7 @@ var Boss = me.ObjectEntity.extend({
         for( var i = 0; i < Math.random() * 8 + 4; i++ ) {
             me.game.world.addChild(new WordChunk( word.pos ));
         }
-        me.game.world.addChild(new Shockwave( word.pos ));
+        me.game.world.addChild(new Boom( word.pos, completed ? 'shockwave' : 'explode' ));
         me.game.world.sort();
 
         me.game.world.removeChild( word );
