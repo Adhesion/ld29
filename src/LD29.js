@@ -25,8 +25,6 @@ var jsApp = {
         me.state.change( me.state.PLAY );
         //me.debug.renderHitBox = false;
 
-        //me.entityPool.add( "player", Player );
-        me.pool.register( "wordspawn", WordSpawn );
     }
 };
 
@@ -59,7 +57,7 @@ var PlayScreen = me.ScreenObject.extend(
             speed: 0.1,
             z: 1
         });
-        this.wordSpawn = new WordSpawn( 800, 600 );
+        this.wordSpawn = new Boss( 800, 600 );
 
         me.game.world.addChild( this.skyScroll );
         me.game.world.addChild( this.wallScroll );
@@ -145,6 +143,7 @@ var Word = me.ObjectEntity.extend({
         this.typedOffset = 0;
     },
 
+    /** Handle a letter, check if it is the next one. */
     typeLetter: function( letter )
     {
         if( this.untypedText.charAt( 0 ) == letter ) {
@@ -199,26 +198,37 @@ var Word = me.ObjectEntity.extend({
     }
 });
 
-/** Might be temporary or something, but this is the thing that will spawn
- * words. */
-var WordSpawn = me.ObjectEntity.extend({
+/** Boss spawns words and shit. */
+var Boss = me.ObjectEntity.extend({
     init: function( screenWidth, screenHeight ) {
+        var settings = {
+            image: 'boss1_healthy',
+            width: 350,
+            height: 350,
+            spritewidth: 350,
+            spriteheight: 350,
+        }
         this.limits = {
             width: screenWidth,
-            height: screenHeight - 100,
+            height: screenHeight - 350,
         };
-        this.parent( this.limits.width - 100, 0, {} );
-        this.setAttacking(true);
-        this.attackEnergy = 1;
+        this.parent( this.limits.width - 300, 0, settings );
+
+        this.renderable.addAnimation("Floaty", [ 0 ], 100 );
+        this.renderable.addAnimation("Talk", [ 2, 0, 2], 100 );
+        this.renderable.addAnimation("Blink", [ 1 ], 100 );
+        this.setFloatyAnimation();
+
+        this.setAttacking(true); // start off attacking
+        this.attackTimer = 0;
+        this.attackEnergy = 9; // how many words to send per round
+        this.attackDelay = 1000; // how long between words
 
         this.floating = true; // screen coords
-        this.z = 5;
-        this.timer = 0;
+        this.z = 4;
 
         // Useless thing. remove it.
         this.locationTimer = 0;
-
-        this.font = new me.BitmapFont("16x16_font", 16);
 
         // Turn some text into some arrays.
         var rawPhrases = [
@@ -246,10 +256,18 @@ var WordSpawn = me.ObjectEntity.extend({
         this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
 
-    /* Remove activeWord. */
+    setFloatyAnimation: function() {
+        var anim = Math.random() * 10 < 2 ? "Blink" : "Floaty";
+        this.renderable.setCurrentAnimation(anim, this.setFloatyAnimation.bind(this) );
+    },
+
+    /* Remove given word. */
     removeWord: function( word )
     {
         me.game.world.removeChild( word );
+
+        this.activeWords = this.activeWords.filter( function(e) { return e != word } );
+
         if( this.currentWord == word ) {
             this.setNextActive();
         }
@@ -311,13 +329,14 @@ var WordSpawn = me.ObjectEntity.extend({
     /* Move the spawn point, spawn a word. */
     update: function( dt )
     {
+        this.parent(dt);
         this.locationTimer += dt;
         this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
 
         if( this.attacking ) {
-            this.timer += dt;
-            if( this.timer > 1000 ) {
-                this.timer = 0;
+            this.attackTimer += dt;
+            if( this.attackTimer > this.attackDelay ) {
+                this.attackTimer = 0;
                 this.addWord();
             }
        }
@@ -326,10 +345,13 @@ var WordSpawn = me.ObjectEntity.extend({
     /** Get the next word from current phrase, add it to screen. */
     addWord: function()
     {
+        var spawnPos = new me.Vector2d(this.pos.x, this.pos.y);
+        spawnPos.y += 200;
+        spawnPos.x += 100;
         // TODO: global tracking
         var word = new Word({
             text: this.nextWord(),
-            pos: this.pos,
+            pos: spawnPos,
             spawner: this,
         });
         if( ! this.currentWord ) {
@@ -343,7 +365,7 @@ var WordSpawn = me.ObjectEntity.extend({
         if( this.attackCount > this.attackEnergy ) {
             this.setAttacking(false);
         }
-
+        this.renderable.setCurrentAnimation("Talk", this.setFloatyAnimation.bind(this) );
         me.game.world.addChild(word);
         me.game.world.sort();
     },
@@ -370,7 +392,7 @@ var WordSpawn = me.ObjectEntity.extend({
                 }
             },
             {
-                name: 'POOP SMEAR',
+                name: 'POOPY SMEAR',
                 action: function( boss, player ) {
                 }
             }
@@ -416,19 +438,7 @@ var WordSpawn = me.ObjectEntity.extend({
                 }
             }
         }
-    },
-
-    /* Check if we need to re-calc font-offset and redraw. */
-    draw: function( context )
-    {
-        this.font.draw(
-            context,
-            'SPAWN',
-            this.pos.x,
-            this.pos.y
-        );
     }
-
 });
 
 var BackgroundScroll = me.Renderable.extend({
