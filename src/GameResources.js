@@ -11,16 +11,16 @@ var GameResources = [
     { name: "intro_radmars2", type: "image", src: "data/intro_radmars2.png" },
     { name: "radmarslogo",     type: "audio", src: "data/", channels: 2     },
 
-    { name: "boss1_healthy", type: "image", src: "data/boss1_1.png" },
-    { name: "boss1_hurt", type: "image", src: "data/boss1_2.png" },
-    { name: "boss1_reveal", type: "image", src: "data/boss1_3.png" },
+    { name: "boss1_1", type: "image", src: "data/boss1_1.png" },
+    { name: "boss1_2", type: "image", src: "data/boss1_2.png" },
+    { name: "boss1_3", type: "image", src: "data/boss1_3.png" },
+
+    { name: "boss2_1", type: "image", src: "data/boss2_1.png" },
+    { name: "boss2_2", type: "image", src: "data/boss2_2.png" },
+    { name: "boss2_3", type: "image", src: "data/boss2_3.png" },
 
     { name: "player", type: "image", src: "data/player.png" },
     { name: "player_halo", type: "image", src: "data/player_halo.png" },
-
-    { name: "", type: "image", src: "data/title_bg.png" },
-    { name: "title_bg", type: "image", src: "data/title_bg.png" },
-    { name: "title_bg", type: "image", src: "data/title_bg.png" },
 
     { name: "player_hp_back", type: "image", src: "data/player_hp_back.png" },
     { name: "player_hp_bar", type: "image", src: "data/player_hp_bar.png" },

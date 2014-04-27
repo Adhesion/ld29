@@ -62,7 +62,10 @@ var PlayScreen = me.ScreenObject.extend(
         });
 
         this.player = new Player( screenWidth );
-        this.boss = new Boss( this.player );
+        this.boss = new Boss({
+            player: this.player,
+            bossID: 1,
+        });
 
         this.playerHP = new HPBar({
             obj: this.player,
@@ -329,9 +332,12 @@ var HPBar = me.Renderable.extend({
 
 /** Boss spawns words and shit. */
 var Boss = me.ObjectEntity.extend({
-    init: function( player ) {
+    init: function( args) {
+        this.hp = 100;
+        this.baseImage = "boss" + args.bossID;
+        this.currentImage = this.getBossImageName();
         var settings = {
-            image: 'boss1_healthy',
+            image: this.currentImage,
             width: 350,
             height: 350,
             spritewidth: 350,
@@ -342,14 +348,13 @@ var Boss = me.ObjectEntity.extend({
             height: screenHeight - 350,
         };
         this.parent( this.limits.width - 300, 0, settings );
-        this.player = player;
+        this.player = args.player;
 
         this.renderable.addAnimation("Floaty", [ 0 ], 100 );
         this.renderable.addAnimation("Talk", [ 2, 0, 2], 100 );
         this.renderable.addAnimation("Blink", [ 1 ], 100 );
         this.setFloatyAnimation();
 
-        this.hp = 100;
 
         this.setAttacking(true); // start off attacking
         this.attackTimer = 0;
@@ -388,8 +393,26 @@ var Boss = me.ObjectEntity.extend({
         this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
 
-    hit: function( dmg ) {
+    getBossImageName: function() {
+        if( this.hp > 66 ) {
+            return this.baseImage + "_1";
+        }
+        else if( this.hp > 33 ) {
+            return this.baseImage + "_2";
+        }
+        else {
+            return this.baseImage + "_3";
+        }
+    },
+
+    draw: function( context ) {
+        this.parent( context );
+    },
+
+    hit: function( dmg )
+    {
         this.hp -= dmg;
+        this.renderable.image = me.loader.getImage(this.getBossImageName());
     },
 
     setFloatyAnimation: function() {
@@ -422,7 +445,8 @@ var Boss = me.ObjectEntity.extend({
         }
     },
 
-    keyDown: function( action ) {
+    keyDown: function( action )
+    {
         if( action ) {
             var ch = action.match(/type_(\S)/);
             if( this.currentWord && ch ) {
@@ -435,7 +459,8 @@ var Boss = me.ObjectEntity.extend({
     },
 
     /* Clean up event handler */
-    onDestroyEvent: function() {
+    onDestroyEvent: function()
+    {
         me.event.unsubscribe(this.subscription);
 
         if( this.attackSub ) {
@@ -475,6 +500,7 @@ var Boss = me.ObjectEntity.extend({
     update: function( dt )
     {
         this.parent(dt);
+
         this.locationTimer += dt;
         this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
 
