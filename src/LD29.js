@@ -11,17 +11,21 @@ var bossData = [
             'I AM BOSS ONE',
         ],
         title: [
-           'Mysterious Boy:', 
-			'Robo-sempai, You just transferred to this highschool,', 
-			'but there is something i must confess to you!',
+           'MYSTERIOUS BOY:', 
+			'ROBO-SEMPAI, YOU JUST',
+			'TRANSFERRED TO THIS SCHOOL', 
 			
-			'Robotic Schoolgirl:' ,
-			'Wait, Who are you again?',
+			'MYSTERIOUS BOY:',
+			'THERE IS SOMETHING',
+			'I MUST CONFESS TO YOU!',
+			
+			'ROBOTIC SCHOOLGIRL:' ,
+			'WAIT, WHO ARE YOU AGAIN?',
 			' ',
 			
-			'Mysterious Boy:', 
-			'I’m your classmate, Luke Lampered!', 
-			'Please, may I speak with you in the hallway?'
+			'MYSTERIOUS BOY:', 
+			'MAY I SPEAK WITH YOU',
+			'IN THE HALLWAY?'
         ],
     },
     {
@@ -37,16 +41,16 @@ var bossData = [
             'GET ME MORE FLAPPING BIRDS',
         ],
         title: [
-			'Bazooka-sensei:', 
-			'Robo-chan~ how are yo-',
-			'What! You’ve killed a fellow student!',
+			'BAZOOKA-SENSEI:', 
+			'ROBO-CHAN~ HOW ARE YO-',
+			'YOU KILLED A STUDENT!',
 			
-			'Robotic Schoolgirl:', 
-			'Wait!', 
-			'I can explain!',
+			'ROBOTIC SCHOOLGIRL:', 
+			'WAIT!', 
+			'I CAN EXPLAIN!',
 			
-			'Bazooka-sensei:', 
-			'Hallway, now!',
+			'BAZOOKA-SENSEI:', 
+			'HALLWAY, NOW!',
 			''
         ],
     },
@@ -63,17 +67,17 @@ var bossData = [
             'GET ME MORE FLAPPING BIRDS',
         ],
         title: [
-			'Mysterious Robotic Schoolgirl:', 
-			'Im you from the future.', 
-			'Something terrible will happen very soon.', 
+			'MYSTERIOUS ROBOTIC SCHOOLGIRL:', 
+			'IM YOU FROM THE FUTURE.', 
+			'SOMETHING TERRIBLE WILL HAPPEN.', 
 			
-			'Robotic Schoolgirl:', 
-			'What the shit?', 
+			'ROBOTIC SCHOOLGIRL:', 
+			'WHAT THE SHIT?', 
 			'',
 			
-			'Mysterious Robotic Schoolgirl:', 
-			'I’ll explain the details in the hallway.', 
-			'Quickly, there isn\'t much time.' 
+			'MYSTERIOUS ROBOTIC SCHOOLGIRL:', 
+			'I’LL EXPLAIN IN THE HALLWAY.', 
+			'QUICKLY, THERE ISN\'T MUCH TIME.' 
         ],
     }
 
