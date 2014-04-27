@@ -41,10 +41,6 @@ var PlayScreen = me.ScreenObject.extend(
     // this will be called on state change -> this
     onResetEvent: function()
     {
-        // me.game.addHUD( 0, 0, me.video.getWidth(), me.video.getHeight() );
-        // me.game.HUD.addItem( "hp", new HPDisplay( 700, 10 ) );
-        // Some HUD shit here?
-
         this.skyScroll = new BackgroundScroll({
             width: screenHeight,
             height: screenWidth,
@@ -65,7 +61,14 @@ var PlayScreen = me.ScreenObject.extend(
         this.player = new Player( screenWidth );
         this.boss = new Boss({
             player: this.player,
-            bossID: 1,
+            bossID: 2,
+            rawPhrases: [
+                'I LOVE FLAPPYBIRD',
+                'KEEP ON FLAPPIN',
+                'FLAPPING HARD',
+                'YOUR MOM CANT FLAP',
+                'GET ME MORE FLAPPING BIRDS'
+            ],
         });
 
         this.playerHP = new HPBar({
@@ -90,7 +93,7 @@ var PlayScreen = me.ScreenObject.extend(
     {
         me.audio.stopTrack();
         me.game.world.removeChild( this.scroller );
-        me.game.world.removeChild( this.wordSpawn );
+        me.game.world.removeChild( this.boss );
     }
 });
 
@@ -380,13 +383,7 @@ var Boss = me.ObjectEntity.extend({
         this.locationTimer = 0;
 
         // Turn some text into some arrays.
-        var rawPhrases = [
-            'I LOVE FLAPPYBIRD',
-            'KEEP ON FLAPPIN',
-            'FLAPPING HARD',
-            'YOUR MOM CANT FLAP',
-            'GET ME MORE FLAPPING BIRDS'
-        ];
+        var rawPhrases = args.rawPhrases;
 
         this.phrases = rawPhrases.map(function( phrase ) {
             return phrase.split( /\s+/ );
