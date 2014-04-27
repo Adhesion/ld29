@@ -158,6 +158,7 @@ var Word = me.ObjectEntity.extend({
         this.font = new me.BitmapFont("16x16_font", 16);
         this.typedFont = new me.BitmapFont("16x16_font_blue", 16);
         this.wordWidth = 0;
+        this.wordSpeed = args.speed;
         this.spawner = args.spawner;
 
         this.floating = true; // screen coords
@@ -186,10 +187,20 @@ var Word = me.ObjectEntity.extend({
     update: function( dt )
     {
         // Move to the left...
-        this.pos.x -= dt / 6;
+        var s = this.wordSpeed;
+        var p = this.spawner.player;
+        var dir = p.anchorPoint.clone();
+        dir.scale(p.width, p.height);
+        dir.add(p.pos);
+        dir.sub(this.pos);
+        var distance = dir.length();
+        dir.normalize();
+        dir.scale( s, s );
+
+        this.pos.add( dir );
 
         // TODO is this needed ultimately?
-        if( this.pos.x + this.wordWidth < 0 ) {
+        if( distance < 20 ) {
             this.spawner.removeWord( this, false );
         }
     },
@@ -525,6 +536,7 @@ var Boss = me.ObjectEntity.extend({
             text: this.nextWord(),
             pos: spawnPos,
             spawner: this,
+            speed: 0.833,
         });
         if( ! this.currentWord ) {
             this.currentWord = word
