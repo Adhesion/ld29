@@ -11,7 +11,16 @@ var GameResources = [
     { name: "intro_radmars2", type: "image", src: "data/intro_radmars2.png" },
     { name: "radmarslogo",     type: "audio", src: "data/", channels: 2     },
 
+    { name: "boss1_healthy", type: "image", src: "data/boss1_1.png" },
+    { name: "boss1_hurt", type: "image", src: "data/boss1_2.png" },
+    { name: "boss1_reveal", type: "image", src: "data/boss1_3.png" },
+
+    { name: "player", type: "image", src: "data/player.png" },
+    { name: "player_halo", type: "image", src: "data/player_halo.png" },
+
     { name: "title_bg", type: "image", src: "data/title_bg.png" },
+    { name: "bg_sky", type: "image", src: "data/bg_sky.png" },
+    { name: "bg_wall", type: "image", src: "data/bg_wall.png" },
     { name: "title", type: "image", src: "data/title_temp.png" },
     { name: "introcta", type: "image", src: "data/introcta.png" },
     { name: "gameover", type: "image", src: "data/gameover_temp.png" },

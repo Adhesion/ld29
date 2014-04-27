@@ -25,8 +25,6 @@ var jsApp = {
         me.state.change( me.state.PLAY );
         //me.debug.renderHitBox = false;
 
-        //me.entityPool.add( "player", Player );
-        me.pool.register( "wordspawn", WordSpawn );
     }
 };
 
@@ -44,10 +42,25 @@ var PlayScreen = me.ScreenObject.extend(
         // me.game.HUD.addItem( "hp", new HPDisplay( 700, 10 ) );
         // Some HUD shit here?
 
-        this.scroller = new BackgroundScroll( 0, 800, 600 );
-        this.wordSpawn = new WordSpawn( 800, 600 );
+        this.skyScroll = new BackgroundScroll({
+            width: 800,
+            height: 600,
+            image: 'bg_sky',
+            speed: 0.08,
+            z: 0
+        });
 
-        me.game.world.addChild( this.scroller );
+        this.wallScroll = new BackgroundScroll({
+            width: 800,
+            height: 600,
+            image: 'bg_wall',
+            speed: 0.1,
+            z: 1
+        });
+        this.wordSpawn = new Boss( 800, 600 );
+
+        me.game.world.addChild( this.skyScroll );
+        me.game.world.addChild( this.wallScroll );
         me.game.world.addChild( this.wordSpawn );
     },
 
@@ -58,6 +71,52 @@ var PlayScreen = me.ScreenObject.extend(
         me.game.world.removeChild( this.wordSpawn );
     }
 });
+
+var Attack = me.ObjectEntity.extend({
+    init: function( args ) {
+        this.parent( args.x, args.y, {} );
+        this.font = new me.BitmapFont("16x16_font", 16);
+        this.selectedFont = new me.BitmapFont("16x16_font_blue", 16);
+        this.index = args.index;
+        this.name = args.name;
+        this.text = "" + this.index + " - " + args.name;
+        this.action = args.action;
+        this.player = args.player;
+        this.boss = args.boss;
+
+        this.floating = true;
+        this.z = 5;
+
+    },
+
+    update: function(dt) {
+        if(this.selected) {
+            this.timer += dt;
+        }
+
+        if( this.timer > 3000 ) {
+            me.game.world.removeChild(this);
+        }
+    },
+
+    select: function() {
+        this.selected = true;
+        this.timer = 0;
+    },
+
+    onDestroyEvent: function() {
+    },
+
+    draw: function(context) {
+        this[ this.selected ? 'selectedFont' : 'font' ].draw(
+            context,
+            this.text,
+            this.pos.x,
+            this.pos.y
+        );
+    }
+});
+
 
 /** Words fly towards players and have two fonts that they render. One is used
  * as they fly normally, the other is used as it gets typed out replacing the
@@ -84,6 +143,7 @@ var Word = me.ObjectEntity.extend({
         this.typedOffset = 0;
     },
 
+    /** Handle a letter, check if it is the next one. */
     typeLetter: function( letter )
     {
         if( this.untypedText.charAt( 0 ) == letter ) {
@@ -138,24 +198,37 @@ var Word = me.ObjectEntity.extend({
     }
 });
 
-/** Might be temporary or something, but this is the thing that will spawn
- * words. */
-var WordSpawn = me.ObjectEntity.extend({
+/** Boss spawns words and shit. */
+var Boss = me.ObjectEntity.extend({
     init: function( screenWidth, screenHeight ) {
+        var settings = {
+            image: 'boss1_healthy',
+            width: 350,
+            height: 350,
+            spritewidth: 350,
+            spriteheight: 350,
+        }
         this.limits = {
             width: screenWidth,
-            height: screenHeight - 100,
+            height: screenHeight - 350,
         };
-        this.parent( this.limits.width - 100, 0, {} );
+        this.parent( this.limits.width - 300, 0, settings );
+
+        this.renderable.addAnimation("Floaty", [ 0 ], 100 );
+        this.renderable.addAnimation("Talk", [ 2, 0, 2], 100 );
+        this.renderable.addAnimation("Blink", [ 1 ], 100 );
+        this.setFloatyAnimation();
+
+        this.setAttacking(true); // start off attacking
+        this.attackTimer = 0;
+        this.attackEnergy = 9; // how many words to send per round
+        this.attackDelay = 1000; // how long between words
 
         this.floating = true; // screen coords
-        this.z = 5;
-        this.timer = 0;
+        this.z = 4;
 
         // Useless thing. remove it.
         this.locationTimer = 0;
-
-        this.font = new me.BitmapFont("16x16_font", 16);
 
         // Turn some text into some arrays.
         var rawPhrases = [
@@ -183,10 +256,18 @@ var WordSpawn = me.ObjectEntity.extend({
         this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
 
-    /* Remove activeWord. */
+    setFloatyAnimation: function() {
+        var anim = Math.random() * 10 < 2 ? "Blink" : "Floaty";
+        this.renderable.setCurrentAnimation(anim, this.setFloatyAnimation.bind(this) );
+    },
+
+    /* Remove given word. */
     removeWord: function( word )
     {
         me.game.world.removeChild( word );
+
+        this.activeWords = this.activeWords.filter( function(e) { return e != word } );
+
         if( this.currentWord == word ) {
             this.setNextActive();
         }
@@ -195,6 +276,10 @@ var WordSpawn = me.ObjectEntity.extend({
     /* Update the active word on the screen */
     setNextActive: function() {
         this.currentWord = this.activeWords.shift();
+        // TODO slightly hackish...
+        if( ! this.attacking && ! this.currentWord ) {
+            this.defenseMenu();
+        }
     },
 
     keyDown: function( action ) {
@@ -244,23 +329,29 @@ var WordSpawn = me.ObjectEntity.extend({
     /* Move the spawn point, spawn a word. */
     update: function( dt )
     {
+        this.parent(dt);
         this.locationTimer += dt;
         this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
-        this.timer += dt;
 
-        if( this.timer > 1000 ) {
-            this.timer = 0;
-            this.addWord();
+        if( this.attacking ) {
+            this.attackTimer += dt;
+            if( this.attackTimer > this.attackDelay ) {
+                this.attackTimer = 0;
+                this.addWord();
+            }
        }
     },
 
     /** Get the next word from current phrase, add it to screen. */
     addWord: function()
     {
+        var spawnPos = new me.Vector2d(this.pos.x, this.pos.y);
+        spawnPos.y += 200;
+        spawnPos.x += 100;
         // TODO: global tracking
         var word = new Word({
             text: this.nextWord(),
-            pos: this.pos,
+            pos: spawnPos,
             spawner: this,
         });
         if( ! this.currentWord ) {
@@ -269,34 +360,100 @@ var WordSpawn = me.ObjectEntity.extend({
         else {
             this.activeWords.push( word );
         }
+
+        this.attackCount++;
+        if( this.attackCount > this.attackEnergy ) {
+            this.setAttacking(false);
+        }
+        this.renderable.setCurrentAnimation("Talk", this.setFloatyAnimation.bind(this) );
         me.game.world.addChild(word);
         me.game.world.sort();
     },
 
-    /* Check if we need to re-calc font-offset and redraw. */
-    draw: function( context )
-    {
-        this.font.draw(
-            context,
-            'SPAWN',
-            this.pos.x,
-            this.pos.y
-        );
-    }
+    setAttacking: function( attacking ) {
+        this.attacking = attacking;
+        if( this.attacking){
+            this.attackCount = 0;
+        }
+    },
 
+    defenseMenu: function()
+    {
+        // TODO invent some mechanics.
+        var possibleItems = [
+            {
+                name: 'LOVING HUG',
+                action: function( boss, player ) {
+                }
+            },
+            {
+                name: 'LIGHTNING BOLT',
+                action: function( boss, player ) {
+                }
+            },
+            {
+                name: 'POOPY SMEAR',
+                action: function( boss, player ) {
+                }
+            }
+        ];
+
+        this.attacks = []
+        for(var i = 1; i <= 3; i++ ) {
+            var item = possibleItems[i-1]; // TODO randomize?
+            var action = new Attack({
+                index: i,
+                boss: this,
+                name: item.name,
+                action: item.action,
+                y: i * 32 + 250,
+                x: 300
+            });
+            this.attacks.push(action);
+            me.game.world.addChild( action );
+        }
+
+        this.attackSub = me.event.subscribe( me.event.KEYDOWN, this.menuInputHandler.bind(this) );
+
+        me.game.world.sort();
+    },
+
+    menuInputHandler: function (action, keyCode) {
+        for( var i = 0; i < this.attacks.length; i ++) {
+            var attack = this.attacks[i];
+            if( keyCode === me.input.KEY['NUM'+attack.index]) {
+                // TODO perform attack here?
+                attack.select();
+
+                // TODO: Delay until after animation completes?
+                this.setAttacking(true);
+
+                me.event.unsubscribe(this.attackSub);
+
+                for( var j = 0; j < this.attacks.length; j ++) {
+                    // Keep the active one on the screen maybe? Or not
+                    if( i != j ) {
+                        me.game.world.removeChild( this.attacks[j] );
+                    }
+                }
+            }
+        }
+    }
 });
 
 var BackgroundScroll = me.Renderable.extend({
-    init: function( pos, width, height )
+    init: function( args )
     {
-        this.parent( pos, width, height );
+        this.parent( 0, args.width, args.height );
         this.xCounter = 0;
 
         this.floating = true;
+        this.speed = args.speed;
+        this.z = args.z;
 
         if ( !this.backgroundImg )
         {
-            this.backgroundImg = me.loader.getImage( "title_bg" );
+            this.backgroundImg = me.loader.getImage( args.image );
         }
     },
 
@@ -307,9 +464,9 @@ var BackgroundScroll = me.Renderable.extend({
         context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, 0 );
     },
 
-    updateScroll: function()
+    updateScroll: function( dt )
     {
-        this.xCounter++;
+        this.xCounter += this.speed * dt;
         if( this.xCounter > this.backgroundImg.width ) {
             this.xCounter = 0;
         }
@@ -319,7 +476,7 @@ var BackgroundScroll = me.Renderable.extend({
 
     update: function( dt )
     {
-        this.updateScroll();
+        this.updateScroll( dt );
     }
 });
 
@@ -338,7 +495,7 @@ var TitleScreen = me.ScreenObject.extend({
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
             if( keyCode === me.input.KEY.ENTER ) {
-                me.state.change( me.state.GAMEOVER );
+                me.state.change( me.state.PLAY);
             }
         });
     },
