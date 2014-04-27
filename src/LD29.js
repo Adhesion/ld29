@@ -4,12 +4,16 @@ var screenWidth = 800;
 var bossData = [
     {
         bossID: 1,
+        mouthOffsetX: 100,
+        mouthOffsetY: 200,
         rawPhrases: [
             'I AM BOSS ONE',
         ],
     },
     {
         bossID: 2,
+        mouthOffsetX: 90,
+        mouthOffsetY: 160,
         rawPhrases: [
             'I LOVE FLAPPYBIRD',
             'KEEP ON FLAPPIN',
@@ -41,16 +45,11 @@ var jsApp = {
     loaded: function() {
         me.state.set( me.state.INTRO, new RadmarsScreen() );
         me.state.set( me.state.MENU, new TitleScreen() );
-        me.state.set( me.state.LEVEL_SCREEN, new LevelScreen() );
+        me.state.set( me.state.SETTINGS , new LevelScreen() ); // TODO: Can we have custom state names????
         me.state.set( me.state.PLAY, new PlayScreen() );
         me.state.set( me.state.GAMEOVER, new GameOverScreen() );
 
-        //me.state.change( me.state.INTRO );
-        //me.state.change( me.state.MENU );
-        //me.state.change( me.state.GAMEOVER );
-        me.state.change( me.state.LEVEL_SCREEN );
-        //me.debug.renderHitBox = false;
-
+        me.state.change( me.state.INTRO );
     }
 };
 
@@ -84,9 +83,11 @@ var PlayScreen = me.ScreenObject.extend(
         this.player = new Player( screenWidth );
         var bd = bossData[nextBoss];
         this.boss = new Boss({
-            player: this.player,
             bossID: bd.bossID,
             rawPhrases: bd.rawPhrases,
+            mouthOffsetX: bd.mouthOffsetX,
+            mouthOffsetY: bd.mouthOffsetY,
+            player: this.player,
         });
 
         this.playerHP = new HPBar({
@@ -470,6 +471,8 @@ var Boss = me.ObjectEntity.extend({
             spritewidth: 350,
             spriteheight: 350,
         }
+        this.mouthOffsetX = args.mouthOffsetX;
+        this.mouthOffsetY = args.mouthOffsetY;
         this.limits = {
             top: 100,
             bottom: 170,
@@ -561,7 +564,7 @@ var Boss = me.ObjectEntity.extend({
             window.setTimeout( function() {
                 nextBoss++;
                 if( bossData[nextBoss] ) {
-                    me.state.change( me.state.LEVEL_SCREEN);
+                    me.state.change( me.state.SETTINGS);
                 }
                 else {
                     // TODO Game reset logic!
@@ -682,8 +685,8 @@ var Boss = me.ObjectEntity.extend({
     addWord: function()
     {
         var spawnPos = new me.Vector2d(this.pos.x, this.pos.y);
-        spawnPos.y += 200;
-        spawnPos.x += 100;
+        spawnPos.y += this.mouthOffsetY; 200;
+        spawnPos.x += this.mouthOffsetX; 100;
         // TODO: global tracking
         var word = new Word({
             text: this.nextWord(),
@@ -721,13 +724,13 @@ var Boss = me.ObjectEntity.extend({
             {
                 name: 'LOVING HUG',
                 action: function( boss, player ) {
-                    boss.hit( 10 );
+                    boss.hit( 33 );
                 }
             },
             {
                 name: 'LIGHTNING BOLT',
                 action: function( boss, player ) {
-                    boss.hit( 30 );
+                    boss.hit( 100 );
                 }
             },
             {
@@ -821,7 +824,7 @@ var TitleScreen = me.ScreenObject.extend({
     },
 
     onResetEvent: function() {
-        this.bg = new me.ImageLayer( "title", screenHeight, screenWidth, "title", 1 );
+        this.bg = new me.ImageLayer( "title", screenWidth, screenHeight, "title", 1 );
         me.game.world.addChild( this.bg );
         this.hitenter = new HitEnter( 300, 300 );
         me.game.world.addChild( this.hitenter );
@@ -830,7 +833,7 @@ var TitleScreen = me.ScreenObject.extend({
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
             if( keyCode === me.input.KEY.ENTER ) {
-                me.state.change( me.state.PLAY);
+                me.state.change( me.state.SETTINGS);
             }
         });
     },
