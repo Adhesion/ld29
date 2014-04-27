@@ -7,6 +7,8 @@ var bossData = [
         mouthOffsetX: 100,
         mouthOffsetY: 200,
         phases: 3,
+        wordSpeed: 1.833,
+        wordSpawnRate: 1000,
         phrasePhases: [
             {
                 phrases: [
@@ -93,65 +95,106 @@ var bossData = [
             'WAIT, WHO ARE YOU AGAIN?',
             ' ',
 
-            'MYSTERIOUS BOY:', 
+            'MYSTERIOUS BOY:',
             'MAY I SPEAK WITH YOU',
             'IN THE HALLWAY?'
         ],
     },
-    /*
     {
         bossID: 2,
         mouthOffsetX: 90,
         mouthOffsetY: 160,
         phases: 3,
-        rawPhrases: [
-            'I LOVE FLAPPYBIRD',
-            'KEEP ON FLAPPIN',
-            'FLAPPING HARD',
-            'YOUR MOM CANT FLAP',
-            'GET ME MORE FLAPPING BIRDS',
+        wordSpeed: 1.833,
+        wordSpawnRate: 1000,
+        phrasePhases: [
+            {
+                phrases: [
+                    'I KNEW WE SHOULD NOT HAVE ADMITTED AN ANDROID TO THIS SCHOOL.',
+                    'ROBO-CHAN, COME WITH ME! WE\'RE GOING TO THE ADMINISTRATORS OFFICE.',
+                ],
+                answers: [
+                    'YOU MUST BE ONE OF THEM TOO!',
+                    'YOU\'LL NEVER TAKE ME ALIVE!',
+                    'I\'M SORRY... SENSEI.',
+                ],
+            },
+            {
+                phrases: [
+                    'AH!',
+                    'SHOOTING YOUR LOVE-LOVE BEAM AT A TEACHER!',
+                    'SUCH RUDENESS IS UNBEFITTING OF A YOUNG LADY.',
+                    'ILL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
+                    'DETENTION! MY OFFICE, TONIGHT.',
+                ],
+                answers: [
+                    'UH... THATS NOT WHAT I MEANT!',
+                    'ONE MORE TIME TO BE SURE.',
+                    'CREEPY.',
+                ],
+            },
+            {
+                phrases: [
+                    'DAMN! YOU\'VE FOUND OUT MY SECRET.',
+                    'I TOO, AM A ROBOT. IN FACT, ALL THE STUDENTS HERE AT THIS SCHOOL ARE.',
+                    'THEY ARE BEING TRAINED AS ROBO-SPIES.',
+                    'WHY AM I TELLING YOU THIS?',
+                    'IT IS SIMPLE.',
+                    'YOU WON\'T MAKE IT TO DETENTION TONIGHT, BABY.',
+                    'YOUR STORY ENDS HERE.',
+                ],
+                answers: [
+                    'SUCK BEAM, CREEP!',
+                    'I WAS MADE TO DEFEAT ROBOTS!',
+                    'I MUST BREAK YOU.',
+                ],
+            },
         ],
         title: [
-			'BAZOOKA-SENSEI:', 
-			'ROBO-CHAN~ HOW ARE YO-',
-			'YOU KILLED A STUDENT!',
-			
-			'ROBOTIC SCHOOLGIRL:', 
-			'WAIT!', 
-			'I CAN EXPLAIN!',
-			
-			'BAZOOKA-SENSEI:', 
-			'HALLWAY, NOW!',
-			''
+            'BAZOOKA-SENSEI:',
+            'ROBO-CHAN~ HOW ARE YO-',
+            'YOU KILLED A STUDENT!',
+
+            'ROBOTIC SCHOOLGIRL:',
+            'WAIT!',
+            'I CAN EXPLAIN!',
+
+            'BAZOOKA-SENSEI:',
+            'HALLWAY, NOW!',
+            ''
         ],
     },
     {
         bossID: 3,
         mouthOffsetX: 90,
         mouthOffsetY: 160,
+        wordSpeed: 1.833,
+        wordSpawnRate: 1000,
         phases: 1,
-        rawPhrases: [
-            'I LOVE FLAPPYBIRD',
-            'KEEP ON FLAPPIN',
-            'FLAPPING HARD',
-            'YOUR MOM CANT FLAP',
-            'GET ME MORE FLAPPING BIRDS',
+        phrasePhases: [
+            {
+                phrases: [
+                    'EAT A DICK',
+                ],
+                answers: [
+                    "WHY?",
+                ],
+            },
         ],
         title: [
-			'MYSTERIOUS ROBOTIC SCHOOLGIRL:', 
-			'IM YOU FROM THE FUTURE.', 
-			'SOMETHING TERRIBLE WILL HAPPEN.', 
-			
-			'ROBOTIC SCHOOLGIRL:', 
-			'WHAT THE SHIT?', 
-			'',
-			
-			'MYSTERIOUS ROBOTIC SCHOOLGIRL:', 
-			'I'LL EXPLAIN IN THE HALLWAY.', 
-			'QUICKLY, THERE ISN\'T MUCH TIME.' 
+            'MYSTERIOUS ROBOTIC SCHOOLGIRL:',
+            'IM YOU FROM THE FUTURE.',
+            'SOMETHING TERRIBLE WILL HAPPEN.',
+
+            'ROBOTIC SCHOOLGIRL:',
+            'WHAT THE SHIT?',
+            '',
+
+            'MYSTERIOUS ROBOTIC SCHOOLGIRL:',
+            'I\'LL EXPLAIN IN THE HALLWAY.',
+            'QUICKLY, THERE ISN\'T MUCH TIME.'
         ],
     }
-*/
 ];
 
 var nextBoss = 0;
@@ -214,6 +257,8 @@ var PlayScreen = me.ScreenObject.extend(
         this.boss = new Boss({
             bossID: bd.bossID,
             phases: bd.phases,
+            wordSpeed: bd.wordSpeed,
+            wordSpawnRate: bd.wordSpawnRate,
             phrasePhases: bd.phrasePhases,
             mouthOffsetX: bd.mouthOffsetX,
             mouthOffsetY: bd.mouthOffsetY,
@@ -626,7 +671,8 @@ var Boss = me.ObjectEntity.extend({
 
         this.setAttacking(true); // start off attacking
         this.attackTimer = 0;
-        this.attackDelay = 1000; // how long between words
+        this.attackDelay = args.wordSpawnRate; // how long between words
+        this.wordSpeed = args.wordSpeed;
 
         this.floating = true; // screen coords
         this.z = 2;
@@ -827,7 +873,7 @@ var Boss = me.ObjectEntity.extend({
             text: text,
             pos: spawnPos,
             spawner: this,
-            speed: 1.833,
+            speed: this.wordSpeed,
         });
         if( ! this.currentWord ) {
             this.currentWord = word
@@ -851,13 +897,14 @@ var Boss = me.ObjectEntity.extend({
         this.attacks = []
         for( var i = 0; i < this.dataSet[this.currentPhrase].answers.length; i ++ ) {
             var answer = this.dataSet[this.currentPhrase].answers[i];
+            var dmg = 100 / this.dataSet.length;
             var action = new Attack({
                 index: i + 1,
                 boss: this,
                 player: this.player,
                 name: answer,
                 action: function( boss, player ) {
-                    boss.hit( 20 );
+                    boss.hit( dmg );
                 },
                 y: i * 32 + 250,
                 x: 250
