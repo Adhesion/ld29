@@ -40,6 +40,7 @@ var GameResources = [
     { name: "wordchunk4", type: "image", src: "data/wordchunk4.png" },
     { name: "wordchunk5", type: "image", src: "data/wordchunk5.png" },
 
+    { name: "talkscene_bg", type: "image", src: "data/talkscene_bg.png" },
     { name: "title_bg", type: "image", src: "data/title_bg.png" },
     { name: "bg_sky", type: "image", src: "data/bg_sky.png" },
     { name: "bg_wall", type: "image", src: "data/bg_wall.png" },

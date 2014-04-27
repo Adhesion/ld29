@@ -897,7 +897,7 @@ var LevelScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight, "gameover");
+        this.gameover = new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
         me.game.world.addChild( this.gameover );
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
