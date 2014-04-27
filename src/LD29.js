@@ -240,6 +240,58 @@ var Word = me.ObjectEntity.extend({
     }
 });
 
+var WordChunk = me.ObjectEntity.extend({
+    init: function( pos )
+    {
+        var settings = {
+            image: 'wordchunk' + (Math.floor(Math.random() * 5) + 1),
+            width: 10,
+            height: 10,
+            spritewidth: 10,
+            spriteheight: 10,
+        }
+        this.parent( pos.x, pos.y, settings );
+
+        this.floating = true; // screen coords
+        this.z = 4;
+
+        this.timer = 0;
+        var direction = Math.random() * 2 * Math.PI;
+        this.vel = new me.Vector2d( Math.cos( direction ), Math.sin( direction ) );
+        this.vel.normalize();
+    },
+
+    update: function( dt ) {
+        this.pos.add(this.vel);
+        this.timer += dt;
+        if(this.timer > 1000) {
+            me.game.world.removeChild(this);
+        }
+    },
+});
+
+var Shockwave = me.ObjectEntity.extend({
+    init: function( pos )
+    {
+        var settings = {
+            image: 'shockwave',
+            width: 100,
+            height: 100,
+            spritewidth: 100,
+            spriteheight: 100,
+        }
+        this.parent( pos.x - 50, pos.y - 50, settings );
+
+        this.renderable.addAnimation("Floaty", [ 0, 1, 2, 3 ], 100 );
+        this.renderable.setCurrentAnimation("Floaty", (function() {
+            me.game.world.removeChild( this );
+        }).bind(this));
+
+        this.floating = true; // screen coords
+        this.z = 3;
+    },
+});
+
 var Player = me.ObjectEntity.extend({
     init: function( screenHeight ) {
         var settings = {
@@ -256,7 +308,7 @@ var Player = me.ObjectEntity.extend({
         this.parent( 10, 0, settings );
 
         this.floating = true; // screen coords
-        this.z = 4;
+        this.z = 2;
 
         this.hp = 100;
 
@@ -377,7 +429,7 @@ var Boss = me.ObjectEntity.extend({
         this.attackDelay = 1000; // how long between words
 
         this.floating = true; // screen coords
-        this.z = 4;
+        this.z = 2;
 
         // Useless thing. remove it.
         this.locationTimer = 0;
@@ -435,6 +487,12 @@ var Boss = me.ObjectEntity.extend({
         if( ! completed ) {
             this.player.hit();
         }
+
+        for( var i = 0; i < Math.random() * 8 + 4; i++ ) {
+            me.game.world.addChild(new WordChunk( word.pos ));
+        }
+        me.game.world.addChild(new Shockwave( word.pos ));
+        me.game.world.sort();
 
         me.game.world.removeChild( word );
 
@@ -533,7 +591,7 @@ var Boss = me.ObjectEntity.extend({
             text: this.nextWord(),
             pos: spawnPos,
             spawner: this,
-            speed: 0.833,
+            speed: 1.833,
         });
         if( ! this.currentWord ) {
             this.currentWord = word
