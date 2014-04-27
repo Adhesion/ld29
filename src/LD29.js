@@ -50,7 +50,8 @@ var PlayScreen = me.ScreenObject.extend(
             height: screenWidth,
             image: 'bg_sky',
             speed: 0.08,
-            z: 0
+            z: 0,
+            yOffset: 70,
         });
 
         this.wallScroll = new BackgroundScroll({
@@ -62,7 +63,10 @@ var PlayScreen = me.ScreenObject.extend(
         });
 
         this.player = new Player( screenWidth );
-        this.boss = new Boss( this.player );
+        this.boss = new Boss({
+            player: this.player,
+            bossID: 1,
+        });
 
         this.playerHP = new HPBar({
             obj: this.player,
@@ -154,6 +158,7 @@ var Word = me.ObjectEntity.extend({
         this.font = new me.BitmapFont("16x16_font", 16);
         this.typedFont = new me.BitmapFont("16x16_font_blue", 16);
         this.wordWidth = 0;
+        this.wordSpeed = args.speed;
         this.spawner = args.spawner;
 
         this.floating = true; // screen coords
@@ -182,10 +187,20 @@ var Word = me.ObjectEntity.extend({
     update: function( dt )
     {
         // Move to the left...
-        this.pos.x -= dt / 6;
+        var s = this.wordSpeed;
+        var p = this.spawner.player;
+        var dir = p.anchorPoint.clone();
+        dir.scale(p.width, p.height);
+        dir.add(p.pos);
+        dir.sub(this.pos);
+        var distance = dir.length();
+        dir.normalize();
+        dir.scale( s, s );
+
+        this.pos.add( dir );
 
         // TODO is this needed ultimately?
-        if( this.pos.x + this.wordWidth < 0 ) {
+        if( distance < 20 ) {
             this.spawner.removeWord( this, false );
         }
     },
@@ -258,7 +273,7 @@ var Player = me.ObjectEntity.extend({
     },
 
     startAttackAnimation: function( effect ) {
-        var powerupFrames = 5;
+        var powerupFrames = 1;
         var attackFrames = 5;
         var animCallback;
         animCallback = (function() {
@@ -329,9 +344,12 @@ var HPBar = me.Renderable.extend({
 
 /** Boss spawns words and shit. */
 var Boss = me.ObjectEntity.extend({
-    init: function( player ) {
+    init: function( args) {
+        this.hp = 100;
+        this.baseImage = "boss" + args.bossID;
+        this.currentImage = this.getBossImageName();
         var settings = {
-            image: 'boss1_healthy',
+            image: this.currentImage,
             width: 350,
             height: 350,
             spritewidth: 350,
@@ -342,14 +360,13 @@ var Boss = me.ObjectEntity.extend({
             height: screenHeight - 350,
         };
         this.parent( this.limits.width - 300, 0, settings );
-        this.player = player;
+        this.player = args.player;
 
         this.renderable.addAnimation("Floaty", [ 0 ], 100 );
         this.renderable.addAnimation("Talk", [ 2, 0, 2], 100 );
         this.renderable.addAnimation("Blink", [ 1 ], 100 );
         this.setFloatyAnimation();
 
-        this.hp = 100;
 
         this.setAttacking(true); // start off attacking
         this.attackTimer = 0;
@@ -388,8 +405,26 @@ var Boss = me.ObjectEntity.extend({
         this.subscription = me.event.subscribe(me.event.KEYDOWN, this.keyDown.bind(this));
     },
 
-    hit: function( dmg ) {
+    getBossImageName: function() {
+        if( this.hp > 66 ) {
+            return this.baseImage + "_1";
+        }
+        else if( this.hp > 33 ) {
+            return this.baseImage + "_2";
+        }
+        else {
+            return this.baseImage + "_3";
+        }
+    },
+
+    draw: function( context ) {
+        this.parent( context );
+    },
+
+    hit: function( dmg )
+    {
         this.hp -= dmg;
+        this.renderable.image = me.loader.getImage(this.getBossImageName());
     },
 
     setFloatyAnimation: function() {
@@ -422,7 +457,8 @@ var Boss = me.ObjectEntity.extend({
         }
     },
 
-    keyDown: function( action ) {
+    keyDown: function( action )
+    {
         if( action ) {
             var ch = action.match(/type_(\S)/);
             if( this.currentWord && ch ) {
@@ -435,7 +471,8 @@ var Boss = me.ObjectEntity.extend({
     },
 
     /* Clean up event handler */
-    onDestroyEvent: function() {
+    onDestroyEvent: function()
+    {
         me.event.unsubscribe(this.subscription);
 
         if( this.attackSub ) {
@@ -475,6 +512,7 @@ var Boss = me.ObjectEntity.extend({
     update: function( dt )
     {
         this.parent(dt);
+
         this.locationTimer += dt;
         this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
 
@@ -498,6 +536,7 @@ var Boss = me.ObjectEntity.extend({
             text: this.nextWord(),
             pos: spawnPos,
             spawner: this,
+            speed: 0.833,
         });
         if( ! this.currentWord ) {
             this.currentWord = word
@@ -596,18 +635,15 @@ var BackgroundScroll = me.Renderable.extend({
         this.floating = true;
         this.speed = args.speed;
         this.z = args.z;
-
-        if ( !this.backgroundImg )
-        {
-            this.backgroundImg = me.loader.getImage( args.image );
-        }
+        this.yOffset = args.yOffset || 0;
+        this.backgroundImg = me.loader.getImage( args.image );
     },
 
     draw: function( context )
     {
         // draw 2 backgrounds to scroll properly
-        context.drawImage( this.backgroundImg, 0 - this.xCounter, 0 );
-        context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, 0 );
+        context.drawImage( this.backgroundImg, 0 - this.xCounter, this.yOffset );
+        context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, this.yOffset );
     },
 
     updateScroll: function( dt )
