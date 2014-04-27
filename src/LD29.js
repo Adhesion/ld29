@@ -258,11 +258,12 @@ var WordChunk = me.ObjectEntity.extend({
         this.timer = 0;
         var direction = Math.random() * 2 * Math.PI;
         this.vel = new me.Vector2d( Math.cos( direction ), Math.sin( direction ) );
-        this.vel.normalize();
+        this.vel.scale(2, 2); // speedish.
     },
 
     update: function( dt ) {
         this.pos.add(this.vel);
+        this.vel.y += .05;
         this.timer += dt;
         if(this.timer > 1000) {
             me.game.world.removeChild(this);
@@ -302,8 +303,8 @@ var Player = me.ObjectEntity.extend({
             spriteheight: 150,
         }
         this.limits = {
-            width: 0,
-            height: screenHeight - 350,
+            top: 100,
+            bottom: 350,
         };
         this.parent( 10, 0, settings );
 
@@ -350,11 +351,13 @@ var Player = me.ObjectEntity.extend({
         this.renderable.setCurrentAnimation( "Powerup", animCallback );
     },
 
-    update: function( dt ) {
+    update: function( dt )
+    {
         this.parent(dt);
         this.locationTimer += dt;
-        this.pos.y = ( 1 + Math.sin( this.locationTimer / 3321 ) )  * this.limits.height / 2;
-
+        var progress = ( 1 + Math.sin( this.locationTimer / 4000 ) );
+        var range = (this.limits.bottom - this.limits.top) / 2
+        this.pos.y = progress * range + this.limits.top;
     }
 });
 
@@ -411,10 +414,10 @@ var Boss = me.ObjectEntity.extend({
             spriteheight: 350,
         }
         this.limits = {
-            width: screenWidth,
-            height: screenHeight - 350,
+            top: 100,
+            bottom: 170,
         };
-        this.parent( this.limits.width - 300, 0, settings );
+        this.parent( screenWidth - 300, this.limits.top, settings );
         this.player = args.player;
 
         this.renderable.addAnimation("Floaty", [ 0 ], 100 );
@@ -488,7 +491,7 @@ var Boss = me.ObjectEntity.extend({
             this.player.hit();
         }
 
-        for( var i = 0; i < Math.random() * 8 + 4; i++ ) {
+        for( var i = 0; i < Math.random() * 8 + word.typedText.length; i++ ) {
             me.game.world.addChild(new WordChunk( word.pos ));
         }
         me.game.world.addChild(new Boom( word.pos, completed ? 'shockwave' : 'explode' ));
@@ -569,7 +572,9 @@ var Boss = me.ObjectEntity.extend({
         this.parent(dt);
 
         this.locationTimer += dt;
-        this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
+        var progress = ( 1 + Math.sin( this.locationTimer / 4000 ) );
+        var range = (this.limits.bottom - this.limits.top) / 2
+        this.pos.y = progress * range + this.limits.top;
 
         if( this.attacking ) {
             this.attackTimer += dt;
@@ -650,7 +655,7 @@ var Boss = me.ObjectEntity.extend({
                 name: item.name,
                 action: item.action,
                 y: i * 32 + 250,
-                x: 300
+                x: 250
             });
             this.attacks.push(action);
             me.game.world.addChild( action );
