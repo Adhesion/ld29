@@ -11,8 +11,17 @@ var bossData = [
             'I AM BOSS ONE',
         ],
         title: [
-            'HI THIS TEXT COMES ON THE ',
-            'SCREEN OR SOMETHING',
+           'Mysterious Boy:', 
+			'Robo-sempai, You just transferred to this highschool,', 
+			'but there is something i must confess to you!',
+			
+			'Robotic Schoolgirl:' ,
+			'Wait, Who are you again?',
+			' ',
+			
+			'Mysterious Boy:', 
+			'I’m your classmate, Luke Lampered!', 
+			'Please, may I speak with you in the hallway?'
         ],
     },
     {
@@ -28,6 +37,17 @@ var bossData = [
             'GET ME MORE FLAPPING BIRDS',
         ],
         title: [
+			'Bazooka-sensei:', 
+			'Robo-chan~ how are yo-',
+			'What! You’ve killed a fellow student!',
+			
+			'Robotic Schoolgirl:', 
+			'Wait!', 
+			'I can explain!',
+			
+			'Bazooka-sensei:', 
+			'Hallway, now!',
+			''
         ],
     },
     {
@@ -43,6 +63,17 @@ var bossData = [
             'GET ME MORE FLAPPING BIRDS',
         ],
         title: [
+			'Mysterious Robotic Schoolgirl:', 
+			'Im you from the future.', 
+			'Something terrible will happen very soon.', 
+			
+			'Robotic Schoolgirl:', 
+			'What the shit?', 
+			'',
+			
+			'Mysterious Robotic Schoolgirl:', 
+			'I’ll explain the details in the hallway.', 
+			'Quickly, there isn\'t much time.' 
         ],
     }
 
