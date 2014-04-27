@@ -1,6 +1,28 @@
 var screenHeight = 600;
 var screenWidth = 800;
 
+var bossData = [
+    {
+        bossID: 1,
+        rawPhrases: [
+            'I AM BOSS ONE',
+        ],
+    },
+    {
+        bossID: 2,
+        rawPhrases: [
+            'I LOVE FLAPPYBIRD',
+            'KEEP ON FLAPPIN',
+            'FLAPPING HARD',
+            'YOUR MOM CANT FLAP',
+            'GET ME MORE FLAPPING BIRDS',
+        ],
+    },
+];
+
+var nextBoss = 0;
+
+
 var jsApp = {
     onload: function() {
         if ( !me.video.init( 'canvas', screenWidth, screenHeight, true ) ) {
@@ -19,13 +41,14 @@ var jsApp = {
     loaded: function() {
         me.state.set( me.state.INTRO, new RadmarsScreen() );
         me.state.set( me.state.MENU, new TitleScreen() );
+        me.state.set( me.state.LEVEL_SCREEN, new LevelScreen() );
         me.state.set( me.state.PLAY, new PlayScreen() );
         me.state.set( me.state.GAMEOVER, new GameOverScreen() );
 
         //me.state.change( me.state.INTRO );
         //me.state.change( me.state.MENU );
         //me.state.change( me.state.GAMEOVER );
-        me.state.change( me.state.PLAY );
+        me.state.change( me.state.LEVEL_SCREEN );
         //me.debug.renderHitBox = false;
 
     }
@@ -59,16 +82,11 @@ var PlayScreen = me.ScreenObject.extend(
         });
 
         this.player = new Player( screenWidth );
+        var bd = bossData[nextBoss];
         this.boss = new Boss({
             player: this.player,
-            bossID: 2,
-            rawPhrases: [
-                'I LOVE FLAPPYBIRD',
-                'KEEP ON FLAPPIN',
-                'FLAPPING HARD',
-                'YOUR MOM CANT FLAP',
-                'GET ME MORE FLAPPING BIRDS'
-            ],
+            bossID: bd.bossID,
+            rawPhrases: bd.rawPhrases,
         });
 
         this.playerHP = new HPBar({
@@ -92,7 +110,11 @@ var PlayScreen = me.ScreenObject.extend(
     onDestroyEvent: function()
     {
         me.audio.stopTrack();
-        me.game.world.removeChild( this.scroller );
+        me.game.world.removeChild( this.wallScroll);
+        me.game.world.removeChild( this.skyScroll);
+        me.game.world.removeChild( this.player);
+        me.game.world.removeChild( this.playerHP);
+        me.game.world.removeChild( this.bossHP);
         me.game.world.removeChild( this.boss );
     }
 });
@@ -355,6 +377,9 @@ var Player = me.ObjectEntity.extend({
     hit: function() {
         this.renderable.setCurrentAnimation("Damage", "Floaty");
         this.hp -= 10;
+        if( this.hp < 0 ) {
+            me.state.change( me.state.GAMEOVER );
+        }
     },
 
     startAttackAnimation: function( effect ) {
@@ -528,6 +553,19 @@ var Boss = me.ObjectEntity.extend({
                     me.game.world.addChild(new Boom( this.randomPos(), 'explode' ));
                 }).bind(this), Math.random() * 250 );
             }
+        }
+
+        if( this.hp <= 0 ) {
+            window.setTimeout( function() {
+                nextBoss++;
+                if( bossData[nextBoss] ) {
+                    me.state.change( me.state.LEVEL_SCREEN);
+                }
+                else {
+                    nextBoss = 0;
+                    me.state.change( me.state.GAME_OVER);
+                }
+            }, 1000);
         }
     },
 
@@ -823,6 +861,35 @@ var HitEnter = me.Renderable.extend({
 
     update: function(dt) {
         me.game.repaint();
+    }
+});
+
+var LevelScreen = me.ScreenObject.extend(
+{
+    init: function()
+    {
+        // disable HUD here?
+        this.parent( true );
+        this.font = new me.BitmapFont("32x32_font", 32);
+        this.font.set( "left" );
+    },
+
+    onResetEvent: function()
+    {
+        this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight, "gameover");
+        me.game.world.addChild( this.gameover );
+
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.PLAY);
+            }
+        });
+    },
+
+    onDestroyEvent: function() {
+        me.audio.stopTrack();
+        me.game.world.removeChild( this.gameover );
+        me.event.unsubscribe( this.subscription );
     }
 });
 
