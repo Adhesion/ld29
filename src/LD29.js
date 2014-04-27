@@ -473,10 +473,32 @@ var Boss = me.ObjectEntity.extend({
         this.parent( context );
     },
 
+    randomPos: function() {
+        var v = this.pos.clone();
+        v.x += Math.random() * (this.width - 130) + 60;
+        v.y += Math.random() * (this.height - 80) + 60;
+        return v;
+    },
+
     hit: function( dmg )
     {
         this.hp -= dmg;
+        var currentImage = this.renderable.image;
         this.renderable.image = me.loader.getImage(this.getBossImageName());
+
+        for( var i = 0; i < 5; i ++ ) {
+            window.setTimeout( (function() {
+                me.game.world.addChild(new Boom( this.randomPos(), 'explode' ));
+            }).bind(this), Math.random() * 250 );
+        }
+
+        if( currentImage != this.renderable.image ) {
+            for( var i = 0; i < 5; i ++ ) {
+                window.setTimeout( (function() {
+                    me.game.world.addChild(new Boom( this.randomPos(), 'explode' ));
+                }).bind(this), Math.random() * 250 );
+            }
+        }
     },
 
     setFloatyAnimation: function() {
