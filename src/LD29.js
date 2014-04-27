@@ -6,6 +6,7 @@ var bossData = [
         bossID: 1,
         mouthOffsetX: 100,
         mouthOffsetY: 200,
+        phases: 3,
         rawPhrases: [
             'I AM BOSS ONE',
         ],
@@ -14,6 +15,7 @@ var bossData = [
         bossID: 2,
         mouthOffsetX: 90,
         mouthOffsetY: 160,
+        phases: 3,
         rawPhrases: [
             'I LOVE FLAPPYBIRD',
             'KEEP ON FLAPPIN',
@@ -22,10 +24,23 @@ var bossData = [
             'GET ME MORE FLAPPING BIRDS',
         ],
     },
+    {
+        bossID: 3,
+        mouthOffsetX: 90,
+        mouthOffsetY: 160,
+        phases: 1,
+        rawPhrases: [
+            'I LOVE FLAPPYBIRD',
+            'KEEP ON FLAPPIN',
+            'FLAPPING HARD',
+            'YOUR MOM CANT FLAP',
+            'GET ME MORE FLAPPING BIRDS',
+        ],
+    }
+
 ];
 
 var nextBoss = 0;
-
 
 var jsApp = {
     onload: function() {
@@ -84,6 +99,7 @@ var PlayScreen = me.ScreenObject.extend(
         var bd = bossData[nextBoss];
         this.boss = new Boss({
             bossID: bd.bossID,
+            phases: bd.phases,
             rawPhrases: bd.rawPhrases,
             mouthOffsetX: bd.mouthOffsetX,
             mouthOffsetY: bd.mouthOffsetY,
@@ -462,6 +478,7 @@ var HPBar = me.Renderable.extend({
 var Boss = me.ObjectEntity.extend({
     init: function( args) {
         this.hp = 100;
+        this.phases = args.phases;
         this.baseImage = "boss" + args.bossID;
         this.currentImage = this.getBossImageName();
         var settings = {
@@ -518,15 +535,13 @@ var Boss = me.ObjectEntity.extend({
     },
 
     getBossImageName: function() {
-        if( this.hp > 66 ) {
-            return this.baseImage + "_1";
+        var divisions = 100 / this.phases;
+        for( var d = 0; d < this.phases; d++ ) {
+            if( this.hp <= divisions * (1+d) ) {
+                return this.baseImage + "_" + (this.phases - d);
+            }
         }
-        else if( this.hp > 33 ) {
-            return this.baseImage + "_2";
-        }
-        else {
-            return this.baseImage + "_3";
-        }
+        return this.baseImage + "_" + d;
     },
 
     draw: function( context ) {
