@@ -1,6 +1,32 @@
 var screenHeight = 600;
 var screenWidth = 800;
 
+var bossData = [
+    {
+        bossID: 1,
+        mouthOffsetX: 100,
+        mouthOffsetY: 200,
+        rawPhrases: [
+            'I AM BOSS ONE',
+        ],
+    },
+    {
+        bossID: 2,
+        mouthOffsetX: 90,
+        mouthOffsetY: 160,
+        rawPhrases: [
+            'I LOVE FLAPPYBIRD',
+            'KEEP ON FLAPPIN',
+            'FLAPPING HARD',
+            'YOUR MOM CANT FLAP',
+            'GET ME MORE FLAPPING BIRDS',
+        ],
+    },
+];
+
+var nextBoss = 0;
+
+
 var jsApp = {
     onload: function() {
         if ( !me.video.init( 'canvas', screenWidth, screenHeight, true ) ) {
@@ -19,15 +45,11 @@ var jsApp = {
     loaded: function() {
         me.state.set( me.state.INTRO, new RadmarsScreen() );
         me.state.set( me.state.MENU, new TitleScreen() );
+        me.state.set( me.state.SETTINGS , new LevelScreen() ); // TODO: Can we have custom state names????
         me.state.set( me.state.PLAY, new PlayScreen() );
         me.state.set( me.state.GAMEOVER, new GameOverScreen() );
 
-        //me.state.change( me.state.INTRO );
-        //me.state.change( me.state.MENU );
-        //me.state.change( me.state.GAMEOVER );
-        me.state.change( me.state.PLAY );
-        //me.debug.renderHitBox = false;
-
+        me.state.change( me.state.INTRO );
     }
 };
 
@@ -41,10 +63,6 @@ var PlayScreen = me.ScreenObject.extend(
     // this will be called on state change -> this
     onResetEvent: function()
     {
-        // me.game.addHUD( 0, 0, me.video.getWidth(), me.video.getHeight() );
-        // me.game.HUD.addItem( "hp", new HPDisplay( 700, 10 ) );
-        // Some HUD shit here?
-
         this.skyScroll = new BackgroundScroll({
             width: screenHeight,
             height: screenWidth,
@@ -59,13 +77,17 @@ var PlayScreen = me.ScreenObject.extend(
             height: screenWidth,
             image: 'bg_wall',
             speed: 0.1,
-            z: 1
+            z: .5,
         });
 
         this.player = new Player( screenWidth );
+        var bd = bossData[nextBoss];
         this.boss = new Boss({
+            bossID: bd.bossID,
+            rawPhrases: bd.rawPhrases,
+            mouthOffsetX: bd.mouthOffsetX,
+            mouthOffsetY: bd.mouthOffsetY,
             player: this.player,
-            bossID: 1,
         });
 
         this.playerHP = new HPBar({
@@ -89,8 +111,12 @@ var PlayScreen = me.ScreenObject.extend(
     onDestroyEvent: function()
     {
         me.audio.stopTrack();
-        me.game.world.removeChild( this.scroller );
-        me.game.world.removeChild( this.wordSpawn );
+        me.game.world.removeChild( this.wallScroll);
+        me.game.world.removeChild( this.skyScroll);
+        me.game.world.removeChild( this.player);
+        me.game.world.removeChild( this.playerHP);
+        me.game.world.removeChild( this.bossHP);
+        me.game.world.removeChild( this.boss );
     }
 });
 
@@ -237,6 +263,88 @@ var Word = me.ObjectEntity.extend({
     }
 });
 
+var WordChunk = me.ObjectEntity.extend({
+    init: function( pos )
+    {
+        var settings = {
+            image: 'wordchunk' + (Math.floor(Math.random() * 5) + 1),
+            width: 10,
+            height: 10,
+            spritewidth: 10,
+            spriteheight: 10,
+        }
+        this.parent( pos.x, pos.y, settings );
+
+        this.floating = true; // screen coords
+        this.z = 4;
+
+        this.timer = 0;
+        var direction = Math.random() * 2 * Math.PI;
+        this.vel = new me.Vector2d( Math.cos( direction ), Math.sin( direction ) );
+        this.vel.scale(2, 2); // speedish.
+    },
+
+    update: function( dt ) {
+        this.pos.add(this.vel);
+        this.vel.y += .05;
+        this.timer += dt;
+        if(this.timer > 1000) {
+            me.game.world.removeChild(this);
+        }
+    },
+});
+
+var Boom = me.ObjectEntity.extend({
+    init: function( pos, img )
+    {
+        var settings = {
+            image: img,
+            width: 100,
+            height: 100,
+            spritewidth: 100,
+            spriteheight: 100,
+        }
+        this.parent( pos.x - 50, pos.y - 50, settings );
+
+        this.renderable.addAnimation("Floaty", [ 0, 1, 2, 3 ], 70 );
+        this.renderable.setCurrentAnimation("Floaty", (function() {
+            me.game.world.removeChild( this );
+        }).bind(this));
+
+        this.floating = true; // screen coords
+        this.z = 3;
+    },
+});
+
+var Beam = me.ObjectEntity.extend({
+    init: function( pos )
+    {
+        var settings = {
+            image: 'beam',
+            width: 700,
+            height: 126,
+            spritewidth: 700,
+            spriteheight: 105,
+        }
+        this.trackingPos = pos;
+        this.parent( pos.x, pos.y, settings );
+
+        this.renderable.addAnimation("Floaty", [ 0, 1, 2, 3, 4, 5], 70 );
+        this.renderable.setCurrentAnimation("Floaty", (function() {
+            me.game.world.removeChild( this );
+        }).bind(this));
+
+        this.floating = true; // screen coords
+        this.z = 3;
+    },
+    update: function(dt) {
+        this.parent(dt)
+        this.pos.x = this.trackingPos.x + 90;
+        this.pos.y = this.trackingPos.y + 25;
+    },
+
+});
+
 var Player = me.ObjectEntity.extend({
     init: function( screenHeight ) {
         var settings = {
@@ -247,13 +355,13 @@ var Player = me.ObjectEntity.extend({
             spriteheight: 150,
         }
         this.limits = {
-            width: 0,
-            height: screenHeight - 350,
+            top: 100,
+            bottom: 350,
         };
         this.parent( 10, 0, settings );
 
         this.floating = true; // screen coords
-        this.z = 4;
+        this.z = 2;
 
         this.hp = 100;
 
@@ -270,6 +378,11 @@ var Player = me.ObjectEntity.extend({
     hit: function() {
         this.renderable.setCurrentAnimation("Damage", "Floaty");
         this.hp -= 10;
+        if( this.hp <= 0 ) {
+            // TODO Game reset logic!
+            nextBoss = 0;
+            me.state.change( me.state.GAMEOVER );
+        }
     },
 
     startAttackAnimation: function( effect ) {
@@ -284,6 +397,7 @@ var Player = me.ObjectEntity.extend({
             else if( attackFrames > 0 ) {
                 attackFrames--;
                 this.renderable.setCurrentAnimation("Attack", animCallback);
+                me.game.world.addChild(new Beam(this.pos));
             }
             else {
                 this.renderable.setCurrentAnimation("Floaty");
@@ -295,11 +409,13 @@ var Player = me.ObjectEntity.extend({
         this.renderable.setCurrentAnimation( "Powerup", animCallback );
     },
 
-    update: function( dt ) {
+    update: function( dt )
+    {
         this.parent(dt);
         this.locationTimer += dt;
-        this.pos.y = ( 1 + Math.sin( this.locationTimer / 3321 ) )  * this.limits.height / 2;
-
+        var progress = ( 1 + Math.sin( this.locationTimer / 4000 ) );
+        var range = (this.limits.bottom - this.limits.top) / 2
+        this.pos.y = progress * range + this.limits.top;
     }
 });
 
@@ -313,7 +429,7 @@ var HPBar = me.Renderable.extend({
         this.front = me.loader.getImage( args.image + "_hp_front" );
 
         this.floating = true; // screen coords
-        this.z = 4;
+        this.z = 1;
         this.hp = 0;
         this.barWidth = 1;
         this.barHeight = 38;
@@ -355,11 +471,13 @@ var Boss = me.ObjectEntity.extend({
             spritewidth: 350,
             spriteheight: 350,
         }
+        this.mouthOffsetX = args.mouthOffsetX;
+        this.mouthOffsetY = args.mouthOffsetY;
         this.limits = {
-            width: screenWidth,
-            height: screenHeight - 350,
+            top: 100,
+            bottom: 170,
         };
-        this.parent( this.limits.width - 300, 0, settings );
+        this.parent( screenWidth - 300, this.limits.top, settings );
         this.player = args.player;
 
         this.renderable.addAnimation("Floaty", [ 0 ], 100 );
@@ -374,19 +492,13 @@ var Boss = me.ObjectEntity.extend({
         this.attackDelay = 1000; // how long between words
 
         this.floating = true; // screen coords
-        this.z = 4;
+        this.z = 2;
 
         // Useless thing. remove it.
         this.locationTimer = 0;
 
         // Turn some text into some arrays.
-        var rawPhrases = [
-            'I LOVE FLAPPYBIRD',
-            'KEEP ON FLAPPIN',
-            'FLAPPING HARD',
-            'YOUR MOM CANT FLAP',
-            'GET ME MORE FLAPPING BIRDS'
-        ];
+        var rawPhrases = args.rawPhrases;
 
         this.phrases = rawPhrases.map(function( phrase ) {
             return phrase.split( /\s+/ );
@@ -421,10 +533,46 @@ var Boss = me.ObjectEntity.extend({
         this.parent( context );
     },
 
+    randomPos: function() {
+        var v = this.pos.clone();
+        v.x += Math.random() * (this.width - 130) + 60;
+        v.y += Math.random() * (this.height - 80) + 60;
+        return v;
+    },
+
     hit: function( dmg )
     {
         this.hp -= dmg;
+        var currentImage = this.renderable.image;
         this.renderable.image = me.loader.getImage(this.getBossImageName());
+
+        for( var i = 0; i < 5; i ++ ) {
+            window.setTimeout( (function() {
+                me.game.world.addChild(new Boom( this.randomPos(), 'explode' ));
+            }).bind(this), Math.random() * 250 );
+        }
+
+        if( currentImage != this.renderable.image ) {
+            for( var i = 0; i < 5; i ++ ) {
+                window.setTimeout( (function() {
+                    me.game.world.addChild(new Boom( this.randomPos(), 'explode' ));
+                }).bind(this), Math.random() * 250 );
+            }
+        }
+
+        if( this.hp <= 0 ) {
+            window.setTimeout( function() {
+                nextBoss++;
+                if( bossData[nextBoss] ) {
+                    me.state.change( me.state.SETTINGS);
+                }
+                else {
+                    // TODO Game reset logic!
+                    nextBoss = 0;
+                    me.state.change( me.state.GAME_OVER);
+                }
+            }, 1000);
+        }
     },
 
     setFloatyAnimation: function() {
@@ -438,6 +586,12 @@ var Boss = me.ObjectEntity.extend({
         if( ! completed ) {
             this.player.hit();
         }
+
+        for( var i = 0; i < Math.random() * 8 + word.typedText.length; i++ ) {
+            me.game.world.addChild(new WordChunk( word.pos ));
+        }
+        me.game.world.addChild(new Boom( word.pos, completed ? 'shockwave' : 'explode' ));
+        me.game.world.sort();
 
         me.game.world.removeChild( word );
 
@@ -514,7 +668,9 @@ var Boss = me.ObjectEntity.extend({
         this.parent(dt);
 
         this.locationTimer += dt;
-        this.pos.y = ( 1 + Math.sin( this.locationTimer / 4000 ) )  * this.limits.height / 2;
+        var progress = ( 1 + Math.sin( this.locationTimer / 4000 ) );
+        var range = (this.limits.bottom - this.limits.top) / 2
+        this.pos.y = progress * range + this.limits.top;
 
         if( this.attacking ) {
             this.attackTimer += dt;
@@ -529,14 +685,14 @@ var Boss = me.ObjectEntity.extend({
     addWord: function()
     {
         var spawnPos = new me.Vector2d(this.pos.x, this.pos.y);
-        spawnPos.y += 200;
-        spawnPos.x += 100;
+        spawnPos.y += this.mouthOffsetY; 200;
+        spawnPos.x += this.mouthOffsetX; 100;
         // TODO: global tracking
         var word = new Word({
             text: this.nextWord(),
             pos: spawnPos,
             spawner: this,
-            speed: 0.833,
+            speed: 1.833,
         });
         if( ! this.currentWord ) {
             this.currentWord = word
@@ -568,13 +724,13 @@ var Boss = me.ObjectEntity.extend({
             {
                 name: 'LOVING HUG',
                 action: function( boss, player ) {
-                    boss.hit( 10 );
+                    boss.hit( 33 );
                 }
             },
             {
                 name: 'LIGHTNING BOLT',
                 action: function( boss, player ) {
-                    boss.hit( 30 );
+                    boss.hit( 100 );
                 }
             },
             {
@@ -595,7 +751,7 @@ var Boss = me.ObjectEntity.extend({
                 name: item.name,
                 action: item.action,
                 y: i * 32 + 250,
-                x: 300
+                x: 250
             });
             this.attacks.push(action);
             me.game.world.addChild( action );
@@ -668,7 +824,7 @@ var TitleScreen = me.ScreenObject.extend({
     },
 
     onResetEvent: function() {
-        this.bg = new me.ImageLayer( "title", screenHeight, screenWidth, "title", 1 );
+        this.bg = new me.ImageLayer( "title", screenWidth, screenHeight, "title", 1 );
         me.game.world.addChild( this.bg );
         this.hitenter = new HitEnter( 300, 300 );
         me.game.world.addChild( this.hitenter );
@@ -677,7 +833,7 @@ var TitleScreen = me.ScreenObject.extend({
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
             if( keyCode === me.input.KEY.ENTER ) {
-                me.state.change( me.state.PLAY);
+                me.state.change( me.state.SETTINGS);
             }
         });
     },
@@ -714,6 +870,35 @@ var HitEnter = me.Renderable.extend({
     }
 });
 
+var LevelScreen = me.ScreenObject.extend(
+{
+    init: function()
+    {
+        // disable HUD here?
+        this.parent( true );
+        this.font = new me.BitmapFont("32x32_font", 32);
+        this.font.set( "left" );
+    },
+
+    onResetEvent: function()
+    {
+        this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight, "gameover");
+        me.game.world.addChild( this.gameover );
+
+        this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
+            if( keyCode === me.input.KEY.ENTER ) {
+                me.state.change( me.state.PLAY);
+            }
+        });
+    },
+
+    onDestroyEvent: function() {
+        me.audio.stopTrack();
+        me.game.world.removeChild( this.gameover );
+        me.event.unsubscribe( this.subscription );
+    }
+});
+
 var GameOverScreen = me.ScreenObject.extend(
 {
     init: function()
@@ -726,7 +911,7 @@ var GameOverScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        this.gameover = new me.ImageLayer("gameover", screenHeight, screenWidth, "gameover");
+        this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight, "gameover");
         me.game.world.addChild( this.gameover );
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
