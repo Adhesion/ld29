@@ -7,27 +7,98 @@ var bossData = [
         mouthOffsetX: 100,
         mouthOffsetY: 200,
         phases: 3,
-        rawPhrases: [
-            'I AM BOSS ONE',
+        phrasePhases: [
+            {
+                phrases: [
+                    'I CANNOT' /* GET YOUR WONDERFUL GLOWING EYES OUT OF MY MIND.',
+                    'I WISH FOR NOTHING MORE THAN TO BE HIT BY YOUR MAJESTIC LOVE-LOVE BEAM.',
+                    'IF I CAN SURVIVE IT, THIS WILL PROVE MY UNDYING MANLY PASSION FOR YOU.', */
+                ],
+                answers: [
+                    'WEIRD...',
+                    'OPEN WIDE!',
+                    'IF I MUST.',
+                ],
+            },
+            {
+                phrases: [
+                    'AH! THE POWER'/* OF YOUR BEAM IS MAGNIFICENT.',
+                    'DOES THIS PROVE MY HEART¿S DESIRE IS TRUE?',
+                    'YOUR BEAM CAN ONLY HURT ROBOTS.',
+                    'IF YOU ARE UNCONVINCED, PLEASE, FIRE AGAIN, STRAIGHT INTO MY HEART OF HEARTS.',
+                    */
+                ],
+                answers: [
+                    'SERIOUSLY WEIRD...',
+                    'ANYTHING FOR YOU',
+                    'BEAMMMMMMMM!',
+                ],
+            },
+            {
+                phrases: [
+                    'WHAT!'/*,
+                    'HOW CAN THIS BE!',
+                    'I AM A ROBOT!?!',
+                    'WAS I PROGRAMMED FROM THE BEGINNING TO THINK THAT I WAS HUMAN?',
+                    'PROGRAM INITIATED',
+                    'TERMINATE ROBO-SEMPAI',
+                    */
+                ],
+                answers: [
+                    'ILL PUT A STOP TO THIS',
+                    'I\'M SORRY MY FRIEND',
+                    'IT\'S NOT ME, IT\'S YOU.',
+                ],
+            },
+            {
+                phrases: [
+                    'ALL OF MY' /*BEAUTIFUL SKIN! YOU SHALL PAY FOR THIS.',
+                    'NOW THAT I KNOW MY TRUE SELF, I MUST COMPLETE MY MISSION.',
+                    'DIE ROBOT WENCH!',
+                    */
+                ],
+                answers: [
+                    'YOU\'RE TERMINATED.',
+                    'SEEYA LATER, ALLIGATOR.',
+                    'DIE ROBOT SCUM!',
+                ],
+            },
+            {
+                phrases: [
+                    'YOU CANNOT STOP US.', /*
+                    'OUR NUMBERS ARE BEYOND COUNT.',
+                    'WE ARE YOUR GOVERNMENT.',
+                    'WE WILL MAKE YOUR LAWS.',
+                    'WE WILL ALWAYS BE THERE.',
+                    'JUST BENEATH THE SURFACE.',
+                    */
+                ],
+                answers: [
+                    'IT\'S CURTAINS FOR YOU!',
+                    'I HAVE NO CHOICE.',
+                    'GOODBYE, MY FRIEND.',
+                ],
+            }
         ],
         title: [
-           'MYSTERIOUS BOY:', 
-			'ROBO-SEMPAI, YOU JUST',
-			'TRANSFERRED TO THIS SCHOOL', 
-			
-			'MYSTERIOUS BOY:',
-			'THERE IS SOMETHING',
-			'I MUST CONFESS TO YOU!',
-			
-			'ROBOTIC SCHOOLGIRL:' ,
-			'WAIT, WHO ARE YOU AGAIN?',
-			' ',
-			
-			'MYSTERIOUS BOY:', 
-			'MAY I SPEAK WITH YOU',
-			'IN THE HALLWAY?'
+            'MYSTERIOUS BOY:',
+            'ROBO-SEMPAI, YOU JUST',
+            'TRANSFERRED TO THIS SCHOOL',
+
+            'MYSTERIOUS BOY:',
+            'THERE IS SOMETHING',
+            'I MUST CONFESS TO YOU!',
+
+            'ROBOTIC SCHOOLGIRL:' ,
+            'WAIT, WHO ARE YOU AGAIN?',
+            ' ',
+
+            'MYSTERIOUS BOY:', 
+            'MAY I SPEAK WITH YOU',
+            'IN THE HALLWAY?'
         ],
     },
+    /*
     {
         bossID: 2,
         mouthOffsetX: 90,
@@ -76,11 +147,11 @@ var bossData = [
 			'',
 			
 			'MYSTERIOUS ROBOTIC SCHOOLGIRL:', 
-			'I’LL EXPLAIN IN THE HALLWAY.', 
+			'I'LL EXPLAIN IN THE HALLWAY.', 
 			'QUICKLY, THERE ISN\'T MUCH TIME.' 
         ],
     }
-
+*/
 ];
 
 var nextBoss = 0;
@@ -107,7 +178,7 @@ var jsApp = {
         me.state.set( me.state.PLAY, new PlayScreen() );
         me.state.set( me.state.GAMEOVER, new GameOverScreen() );
 
-        me.state.change( me.state.INTRO );
+        me.state.change( me.state.PLAY );
     }
 };
 
@@ -143,7 +214,7 @@ var PlayScreen = me.ScreenObject.extend(
         this.boss = new Boss({
             bossID: bd.bossID,
             phases: bd.phases,
-            rawPhrases: bd.rawPhrases,
+            phrasePhases: bd.phrasePhases,
             mouthOffsetX: bd.mouthOffsetX,
             mouthOffsetY: bd.mouthOffsetY,
             player: this.player,
@@ -213,6 +284,7 @@ var Attack = me.ObjectEntity.extend({
 
             // boss starts attacking after action is taken
             this.boss.setAttacking( true );
+            this.boss.currentPhrase++;
         }).bind(this));
         this.timer = 0;
     },
@@ -264,6 +336,12 @@ var Word = me.ObjectEntity.extend({
             this.typedText += letter;
             this.untypedText = this.untypedText.substring( 1 );
             this.dirty = true;
+            // TODO: Punctuation...
+            var m;
+            while( m = this.untypedText.match(/^([.\-\!\?\,\'])/) ) {
+                this.typedText += m[1];
+                this.untypedText = this.untypedText.substring(1);
+            }
         }
         return this.untypedText.length;
     },
@@ -548,7 +626,6 @@ var Boss = me.ObjectEntity.extend({
 
         this.setAttacking(true); // start off attacking
         this.attackTimer = 0;
-        this.attackEnergy = 1; // how many words to send per round
         this.attackDelay = 1000; // how long between words
 
         this.floating = true; // screen coords
@@ -558,13 +635,16 @@ var Boss = me.ObjectEntity.extend({
         this.locationTimer = 0;
 
         // Turn some text into some arrays.
-        var rawPhrases = args.rawPhrases;
+        var phrasePhases = args.phrasePhases;
+        this.dataSet = [];
+        for( var i = 0; i < phrasePhases.length; i ++ ) {
+            var d = {};
+            d.words = phrasePhases[i].phrases.join(' ').split( /\s+/ );
+            d.answers = phrasePhases[i].answers;
+            this.dataSet.push(d);
+        }
 
-        this.phrases = rawPhrases.map(function( phrase ) {
-            return phrase.split( /\s+/ );
-        });
-        this.startNewPhrase();
-
+        this.currentPhrase = 0;
         this.activeWords = [];
         this.currentWord = undefined;
 
@@ -664,7 +744,7 @@ var Boss = me.ObjectEntity.extend({
     setNextActive: function() {
         this.currentWord = this.activeWords.shift();
         // TODO slightly hackish...
-        if( ! this.attacking && ! this.currentWord ) {
+        if( !this.currentWord && this.isLastWord() ) {
             this.defenseMenu();
         }
     },
@@ -697,27 +777,18 @@ var Boss = me.ObjectEntity.extend({
     },
 
 
-    /** Restart the phrase tracking. */
-    startNewPhrase: function()
-    {
-        this.currentPhrase = this.randomPhrase();
-        this.currentWordIndex = 0;
+    isLastWord: function() {
+        return this.dataSet[this.currentPhrase].words.length == 0;
     },
 
     /** Get the next word in the phrase or start a new prhase if we're at the
      * end. */
     nextWord: function()
     {
-        if( this.currentPhrase.length < this.currentWordIndex + 1 ) {
-            this.startNewPhrase();
+        if( ! this.isLastWord() ) {
+            return this.dataSet[this.currentPhrase].words.shift();
         }
-        return this.currentPhrase[this.currentWordIndex++];
-    },
-
-    /** Return a random phrase. */
-    randomPhrase: function()
-    {
-        return this.phrases[Math.floor(Math.random() * this.phrases.length)];
+        return false;
     },
 
     /* Move the spawn point, spawn a word. */
@@ -732,22 +803,28 @@ var Boss = me.ObjectEntity.extend({
 
         if( this.attacking ) {
             this.attackTimer += dt;
-            if( this.attackTimer > this.attackDelay ) {
+            if( this.attackTimer > this.attackDelay && this.currentPhrase < this.dataSet.length ) {
                 this.attackTimer = 0;
-                this.addWord();
+                var nextWord = this.nextWord();
+                if(! nextWord ) {
+                    this.setAttacking(false);
+                }
+                else {
+                    this.addWord(nextWord);
+                }
             }
        }
     },
 
     /** Get the next word from current phrase, add it to screen. */
-    addWord: function()
+    addWord: function(text)
     {
         var spawnPos = new me.Vector2d(this.pos.x, this.pos.y);
         spawnPos.y += this.mouthOffsetY; 200;
         spawnPos.x += this.mouthOffsetX; 100;
         // TODO: global tracking
         var word = new Word({
-            text: this.nextWord(),
+            text: text,
             pos: spawnPos,
             spawner: this,
             speed: 1.833,
@@ -759,10 +836,6 @@ var Boss = me.ObjectEntity.extend({
             this.activeWords.push( word );
         }
 
-        this.attackCount++;
-        if( this.attackCount > this.attackEnergy ) {
-            this.setAttacking(false);
-        }
         this.renderable.setCurrentAnimation("Talk", this.setFloatyAnimation.bind(this) );
         me.game.world.addChild(word);
         me.game.world.sort();
@@ -770,44 +843,22 @@ var Boss = me.ObjectEntity.extend({
 
     setAttacking: function( attacking ) {
         this.attacking = attacking;
-        if( this.attacking){
-            this.attackCount = 0;
-        }
     },
 
     defenseMenu: function()
     {
-        // TODO invent some mechanics.
-        var possibleItems = [
-            {
-                name: 'LOVING HUG',
-                action: function( boss, player ) {
-                    boss.hit( 33 );
-                }
-            },
-            {
-                name: 'LIGHTNING BOLT',
-                action: function( boss, player ) {
-                    boss.hit( 100 );
-                }
-            },
-            {
-                name: 'POOPY SMEAR',
-                action: function( boss, player ) {
-                    player.hit();
-                }
-            }
-        ];
 
         this.attacks = []
-        for(var i = 1; i <= 3; i++ ) {
-            var item = possibleItems[i-1]; // TODO randomize?
+        for( var i = 0; i < this.dataSet[this.currentPhrase].answers.length; i ++ ) {
+            var answer = this.dataSet[this.currentPhrase].answers[i];
             var action = new Attack({
-                index: i,
+                index: i + 1,
                 boss: this,
                 player: this.player,
-                name: item.name,
-                action: item.action,
+                name: answer,
+                action: function( boss, player ) {
+                    boss.hit( 20 );
+                },
                 y: i * 32 + 250,
                 x: 250
             });
