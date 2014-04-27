@@ -31,6 +31,7 @@ var GameResources = [
     { name: "boss_hp_front", type: "image", src: "data/boss_hp_front.png" },
 
     { name: "shockwave", type: "image", src: "data/shockwave.png" },
+    { name: "beam", type: "image", src: "data/beam.png" },
     { name: "explode", type: "image", src: "data/explode.png" },
     { name: "wordchunk1", type: "image", src: "data/wordchunk1.png" },
     { name: "wordchunk2", type: "image", src: "data/wordchunk2.png" },

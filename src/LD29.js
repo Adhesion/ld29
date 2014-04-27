@@ -293,6 +293,35 @@ var Boom = me.ObjectEntity.extend({
     },
 });
 
+var Beam = me.ObjectEntity.extend({
+    init: function( pos )
+    {
+        var settings = {
+            image: 'beam',
+            width: 700,
+            height: 126,
+            spritewidth: 700,
+            spriteheight: 105,
+        }
+        this.trackingPos = pos;
+        this.parent( pos.x, pos.y, settings );
+
+        this.renderable.addAnimation("Floaty", [ 0, 1, 2, 3, 4, 5], 70 );
+        this.renderable.setCurrentAnimation("Floaty", (function() {
+            me.game.world.removeChild( this );
+        }).bind(this));
+
+        this.floating = true; // screen coords
+        this.z = 3;
+    },
+    update: function(dt) {
+        this.parent(dt)
+        this.pos.x = this.trackingPos.x + 90;
+        this.pos.y = this.trackingPos.y + 25;
+    },
+
+});
+
 var Player = me.ObjectEntity.extend({
     init: function( screenHeight ) {
         var settings = {
@@ -340,6 +369,7 @@ var Player = me.ObjectEntity.extend({
             else if( attackFrames > 0 ) {
                 attackFrames--;
                 this.renderable.setCurrentAnimation("Attack", animCallback);
+                me.game.world.addChild(new Beam(this.pos));
             }
             else {
                 this.renderable.setCurrentAnimation("Floaty");
