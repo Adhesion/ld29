@@ -50,7 +50,8 @@ var PlayScreen = me.ScreenObject.extend(
             height: screenWidth,
             image: 'bg_sky',
             speed: 0.08,
-            z: 0
+            z: 0,
+            yOffset: 70,
         });
 
         this.wallScroll = new BackgroundScroll({
@@ -261,7 +262,7 @@ var Player = me.ObjectEntity.extend({
     },
 
     startAttackAnimation: function( effect ) {
-        var powerupFrames = 5;
+        var powerupFrames = 1;
         var attackFrames = 5;
         var animCallback;
         animCallback = (function() {
@@ -622,18 +623,15 @@ var BackgroundScroll = me.Renderable.extend({
         this.floating = true;
         this.speed = args.speed;
         this.z = args.z;
-
-        if ( !this.backgroundImg )
-        {
-            this.backgroundImg = me.loader.getImage( args.image );
-        }
+        this.yOffset = args.yOffset || 0;
+        this.backgroundImg = me.loader.getImage( args.image );
     },
 
     draw: function( context )
     {
         // draw 2 backgrounds to scroll properly
-        context.drawImage( this.backgroundImg, 0 - this.xCounter, 0 );
-        context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, 0 );
+        context.drawImage( this.backgroundImg, 0 - this.xCounter, this.yOffset );
+        context.drawImage( this.backgroundImg, 0 - this.xCounter + this.backgroundImg.width, this.yOffset );
     },
 
     updateScroll: function( dt )
