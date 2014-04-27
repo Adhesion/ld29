@@ -57,11 +57,14 @@ var PlayScreen = me.ScreenObject.extend(
             speed: 0.1,
             z: 1
         });
-        this.wordSpawn = new Boss( 800, 600 );
+
+        this.player = new Player( 600 );
+        this.wordSpawn = new Boss( 800, 600, this.player );
 
         me.game.world.addChild( this.skyScroll );
         me.game.world.addChild( this.wallScroll );
         me.game.world.addChild( this.wordSpawn );
+        me.game.world.addChild( this.player );
     },
 
     onDestroyEvent: function()
@@ -99,8 +102,9 @@ var Attack = me.ObjectEntity.extend({
         }
     },
 
-    select: function() {
+    select: function(boss, player) {
         this.selected = true;
+        player.startAttackAnimation();
         this.timer = 0;
     },
 
@@ -198,9 +202,66 @@ var Word = me.ObjectEntity.extend({
     }
 });
 
+var Player = me.ObjectEntity.extend({
+    init: function( screenHeight ) {
+        var settings = {
+            image: 'player',
+            width: 150,
+            height: 150,
+            spritewidth: 150,
+            spriteheight: 150,
+        }
+        this.limits = {
+            width: 0,
+            height: screenHeight - 350,
+        };
+        this.parent( 10, 0, settings );
+
+        this.floating = true; // screen coords
+        this.z = 4;
+
+        this.renderable.addAnimation("Floaty", [ 0,1,2,3 ], 100 );
+        this.renderable.addAnimation("Damage", [ 4 ], 100 );
+        this.renderable.addAnimation("Powerup", [ 5, 6 ], 100 );
+        this.renderable.addAnimation("Attack", [ 7, 8 ], 100 );
+
+        this.renderable.setCurrentAnimation( "Floaty" );
+
+        this.locationTimer = 0;
+    },
+
+    startAttackAnimation: function() {
+        var powerupFrames = 5;
+        var attackFrames = 5;
+        var animCallback;
+        animCallback = (function() {
+            if(powerupFrames > 0 ) {
+                powerupFrames --;
+                this.renderable.setCurrentAnimation("Powerup", animCallback);
+            }
+            else if( attackFrames > 0 ) {
+                attackFrames--;
+                this.renderable.setCurrentAnimation("Attack", animCallback);
+            }
+            else {
+                this.renderable.setCurrentAnimation("Floaty");
+            }
+        }).bind(this);
+
+        this.renderable.setCurrentAnimation( "Powerup", animCallback );
+    },
+
+    update: function( dt ) {
+        this.parent(dt);
+        this.locationTimer += dt;
+        this.pos.y = ( 1 + Math.sin( this.locationTimer / 3321 ) )  * this.limits.height / 2;
+
+    }
+});
+
 /** Boss spawns words and shit. */
 var Boss = me.ObjectEntity.extend({
-    init: function( screenWidth, screenHeight ) {
+    init: function( screenWidth, screenHeight, player ) {
         var settings = {
             image: 'boss1_healthy',
             width: 350,
@@ -213,6 +274,7 @@ var Boss = me.ObjectEntity.extend({
             height: screenHeight - 350,
         };
         this.parent( this.limits.width - 300, 0, settings );
+        this.player = player;
 
         this.renderable.addAnimation("Floaty", [ 0 ], 100 );
         this.renderable.addAnimation("Talk", [ 2, 0, 2], 100 );
@@ -221,7 +283,7 @@ var Boss = me.ObjectEntity.extend({
 
         this.setAttacking(true); // start off attacking
         this.attackTimer = 0;
-        this.attackEnergy = 9; // how many words to send per round
+        this.attackEnergy = 1; // how many words to send per round
         this.attackDelay = 1000; // how long between words
 
         this.floating = true; // screen coords
@@ -297,6 +359,11 @@ var Boss = me.ObjectEntity.extend({
     /* Clean up event handler */
     onDestroyEvent: function() {
         me.event.unsubscribe(this.subscription);
+
+        if( this.attackSub ) {
+            me.event.unsubscribe(this.attackSub);
+        }
+
         for( var c = 65; c <= 90; c++ ) {
             me.input.unbindKey(me.input.KEY[c]);
         }
@@ -423,7 +490,7 @@ var Boss = me.ObjectEntity.extend({
             var attack = this.attacks[i];
             if( keyCode === me.input.KEY['NUM'+attack.index]) {
                 // TODO perform attack here?
-                attack.select();
+                attack.select( this, this.player );
 
                 // TODO: Delay until after animation completes?
                 this.setAttacking(true);
