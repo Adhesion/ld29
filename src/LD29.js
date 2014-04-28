@@ -203,6 +203,7 @@ var jsApp = {
         }
 
         me.audio.init( "m4a,ogg" );
+        me.audio.setVolume( 0.7 );
 
         me.loader.onload = this.loaded.bind( this );
         me.loader.preload( GameResources );
@@ -277,11 +278,15 @@ var PlayScreen = me.ScreenObject.extend(
         me.game.world.addChild( this.player );
         me.game.world.addChild( this.playerHP );
         me.game.world.addChild( this.bossHP );
+
+        if( nextBoss == 0 ) {
+            me.audio.stopTrack();
+            me.audio.playTrack( "ld29" );
+        }
     },
 
     onDestroyEvent: function()
     {
-        me.audio.stopTrack();
         me.game.world.removeChild( this.wallScroll);
         me.game.world.removeChild( this.skyScroll);
         me.game.world.removeChild( this.player);
@@ -383,6 +388,12 @@ var Word = me.ObjectEntity.extend({
                 this.typedText += m[1];
                 this.untypedText = this.untypedText.substring(1);
             }
+
+            var note = Math.floor(Math.random() * 7) + 1;
+            me.audio.play( "type" + note, false, null, 0.3 );
+        }
+        else {
+            me.audio.play( "miss" );
         }
         return this.untypedText.length;
     },
@@ -557,6 +568,7 @@ var Player = me.ObjectEntity.extend({
 		//me.game.viewport.shake(10, 1000, me.game.viewport.AXIS.VERTICAL);
         this.renderable.setCurrentAnimation("Damage", "Floaty");
         this.hp -= 10;
+        me.audio.play( "hit" );
         if( this.hp <= 0 ) {
             // TODO Game reset logic!
             nextBoss = 0;
@@ -577,6 +589,8 @@ var Player = me.ObjectEntity.extend({
                 attackFrames--;
                 this.renderable.setCurrentAnimation("Attack", animCallback);
                 me.game.world.addChild(new Beam(this.pos));
+                if( attackFrames == 4 )
+                    me.audio.play( "beam" );
             }
             else {
                 this.renderable.setCurrentAnimation("Floaty");
@@ -586,6 +600,7 @@ var Player = me.ObjectEntity.extend({
         }).bind(this);
 
         this.renderable.setCurrentAnimation( "Powerup", animCallback );
+        me.audio.play( "beamcharge" );
     },
 
     update: function( dt )
@@ -643,6 +658,7 @@ var Boss = me.ObjectEntity.extend({
         this.hp = 100;
         this.phases = args.phases;
         this.baseImage = "boss" + args.bossID;
+        this.bossID = args.bossID;
         this.currentImage = this.getBossImageName();
         var settings = {
             image: this.currentImage,
@@ -728,6 +744,8 @@ var Boss = me.ObjectEntity.extend({
         var currentImage = this.renderable.image;
         this.renderable.image = me.loader.getImage(this.getBossImageName());
 
+        me.audio.play( "explosion" );
+
         for( var i = 0; i < 5; i ++ ) {
             window.setTimeout( (function() {
                 me.game.world.addChild(new Boom( this.randomPos(), 'explode' ));
@@ -777,6 +795,8 @@ var Boss = me.ObjectEntity.extend({
 
         me.game.world.removeChild( word );
 
+        me.audio.play( "word", false, null, 0.3 );
+
         this.activeWords = this.activeWords.filter( function(e) { return e != word } );
 
         if( this.currentWord == word ) {
@@ -798,9 +818,9 @@ var Boss = me.ObjectEntity.extend({
         if( action ) {
             var ch = action.match(/type_(\S)/);
             if( this.currentWord && ch ) {
-                var charsLeft = this.currentWord.typeLetter( ch[1] );
-                if( charsLeft == 0 ) {
-                    this.removeWord( this.currentWord, true );
+                var charsLeft = this.currentWord.typeLetter(ch[1]);
+                if (charsLeft == 0) {
+                    this.removeWord(this.currentWord, true);
                 }
             }
         }
@@ -885,6 +905,9 @@ var Boss = me.ObjectEntity.extend({
         this.renderable.setCurrentAnimation("Talk", this.setFloatyAnimation.bind(this) );
         me.game.world.addChild(word);
         me.game.world.sort();
+
+        var speech = Math.floor(Math.random() * 7) + 1;
+        me.audio.play( "speech" + this.bossID + "-" + speech, false, null, 0.8 );
     },
 
     setAttacking: function( attacking ) {
@@ -1006,7 +1029,7 @@ var TitleScreen = me.ScreenObject.extend({
         me.game.world.addChild( this.hitenter );
         me.game.world.addChild( this.logo );
 
-        //me.audio.playTrack( "intro" );
+        me.audio.playTrack( "ld29-intro" );
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
             if( keyCode === me.input.KEY.ENTER ) {
@@ -1016,11 +1039,9 @@ var TitleScreen = me.ScreenObject.extend({
     },
 
     onDestroyEvent: function() {
-        me.audio.stopTrack();
         me.game.world.removeChild( this.bg );
         me.game.world.removeChild( this.hitenter );
         me.event.unsubscribe( this.subscription );
-        //me.audio.play( "ready" );
     }
 });
 
@@ -1142,7 +1163,6 @@ var LevelScreen = me.ScreenObject.extend(
 	},
 	
     onDestroyEvent: function() {
-        me.audio.stopTrack();
         me.game.world.removeChild( this.bg );
         me.game.world.removeChild( this.bossPortrait );
         me.event.unsubscribe( this.subscription );
@@ -1163,6 +1183,8 @@ var GameOverScreen = me.ScreenObject.extend(
     {
         this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight, "gameover");
         me.game.world.addChild( this.gameover );
+        me.audio.stopTrack();
+        me.audio.playTrack( "ld29-intro" );
 
         this.subscription = me.event.subscribe( me.event.KEYDOWN, function (action, keyCode, edge) {
             if( keyCode === me.input.KEY.ENTER ) {
@@ -1188,6 +1210,8 @@ var RadmarsScreen = me.ScreenObject.extend({
                 me.state.change( me.state.MENU );
             }
         });
+
+        me.audio.playTrack( "radmarslogo" );
     },
 
     onDestroyEvent: function() {
@@ -1217,7 +1241,6 @@ var RadmarsRenderable = me.Renderable.extend({
         }
 
         me.input.bindKey( me.input.KEY.ENTER, "enter", true );
-        me.audio.playTrack( "radmarslogo" );
     },
 
     draw: function(context) {

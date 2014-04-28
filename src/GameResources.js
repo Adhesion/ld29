@@ -68,6 +68,7 @@ var GameResources = [
     { name: "type5",     type: "audio", src: "data/", channels: 2     },
     { name: "type6",     type: "audio", src: "data/", channels: 2     },
     { name: "type7",     type: "audio", src: "data/", channels: 2     },
+    { name: "word",     type: "audio", src: "data/", channels: 2     },
     { name: "speech1-1",     type: "audio", src: "data/", channels: 2     },
     { name: "speech1-2",     type: "audio", src: "data/", channels: 2     },
     { name: "speech1-3",     type: "audio", src: "data/", channels: 2     },
@@ -89,5 +90,8 @@ var GameResources = [
     { name: "speech3-5",     type: "audio", src: "data/", channels: 2     },
     { name: "speech3-6",     type: "audio", src: "data/", channels: 2     },
     { name: "speech3-7",     type: "audio", src: "data/", channels: 2     },
+
+    { name: "ld29",     type: "audio", src: "data/", channels: 2     },
+    { name: "ld29-intro",     type: "audio", src: "data/", channels: 2     },
 
 ];
