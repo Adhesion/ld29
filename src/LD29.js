@@ -85,7 +85,7 @@ var bossData = [
 
             'MYSTERIOUS BOY:',
             'THERE IS SOMETHING',
-            'I MUST CONFESS TO YOU!',
+            'I MUST CONFESS TO YOU$',
 
             'ROBOTIC SCHOOLGIRL:' ,
             'WAIT, WHO ARE YOU AGAIN?',
