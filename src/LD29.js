@@ -228,8 +228,8 @@ var bossData = [
                     'WILL YOU PLEASE JUST LISTEN TO ME FOR A MINUTE?',
                 ],
                 answers: [
-                    "MORE LIES!",
-                    "YOU ARE A ROBOT! ADMIT IT!",
+                    "AT LAST THE TRUTH EMERGES!",
+                    "SO YOU ARE A ROBOT!",
                     "ENOUGH TALK.",
                 ],
             },
