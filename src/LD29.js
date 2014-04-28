@@ -9,13 +9,13 @@ var bossData = [
         mouthOffsetY: 200,
         phases: 3,
         wordSpeed: 1.833,
-        wordSpawnRate: 1000,
+        wordSpawnRate: 750,
         phrasePhases: [
             {
                 phrases: [
                     'I CANNOT GET YOUR WONDERFUL GLOWING EYES OUT OF MY MIND.',
                     'I WISH FOR NOTHING MORE THAN TO BE HIT BY YOUR MAJESTIC LOVE-LOVE BEAM.',
-                    'IF I CAN SURVIVE IT, THIS WILL PROVE MY UNDYING MANLY PASSION FOR YOU.',
+                    'IF I SURVIVE, MY UNDYING MANLY PASSION FOR YOU WILL BE PROVEN.',
                 ],
                 answers: [
                     'WEIRD...',
@@ -27,21 +27,19 @@ var bossData = [
                 phrases: [
                     'AH! THE POWER OF YOUR BEAM IS MAGNIFICENT.',
                     'DOES THIS PROVE MY HEART\'S DESIRE IS TRUE?',
-                    'YOUR BEAM CAN ONLY HURT ROBOTS.',
-                    'IF YOU ARE UNCONVINCED, PLEASE, FIRE AGAIN, STRAIGHT INTO MY HEART OF HEARTS.',
+                    'YOUR BEAM CAN ONLY HARM ROBOTS.',
+                    'PLEASE, FIRE AGAIN, STRAIGHT INTO MY HEART.',
                 ],
                 answers: [
                     'SERIOUSLY WEIRD...',
-                    'ANYTHING FOR YOU',
+                    'ANYTHING FOR YOU$',
                     'BEAMMMMMMMM!',
                 ],
             },
             {
                 phrases: [
                     'WHAT!',
-                    'HOW CAN THIS BE!',
                     'I AM A ROBOT!?!',
-                    'WAS I PROGRAMMED FROM THE BEGINNING TO THINK THAT I WAS HUMAN?',
                     'PROGRAM INITIATED',
                     'TERMINATE ROBO-SEMPAI',
                 ],
@@ -53,8 +51,8 @@ var bossData = [
             },
             {
                 phrases: [
-                    'ALL OF MY BEAUTIFUL SKIN! YOU SHALL PAY FOR THIS.',
-                    'NOW THAT I KNOW MY TRUE SELF, I MUST COMPLETE MY MISSION.',
+                    'MY BEAUTIFUL SKIN!',
+					'YOU SHALL PAY FOR THIS.',
                     'DIE ROBOT WENCH!',
                 ],
                 answers: [
@@ -67,9 +65,7 @@ var bossData = [
                 phrases: [
                     'YOU CANNOT STOP US.',
                     'OUR NUMBERS ARE BEYOND COUNT.',
-                    'WE ARE YOUR GOVERNMENT.',
-                    'WE WILL MAKE YOUR LAWS.',
-                    'WE WILL ALWAYS BE THERE.',
+                    'WE WILL ALWAYS BE HERE.',
                     'JUST BENEATH THE SURFACE.',
                 ],
                 answers: [
@@ -81,20 +77,28 @@ var bossData = [
         ],
         title: [
             'MYSTERIOUS BOY:',
-            'ROBO-SEMPAI, YOU JUST',
-            'TRANSFERRED TO THIS SCHOOL',
+            'ROBO-SEMPAI, I KNOW YOU JUST',
+            'TRANSFERRED TO THIS SCHOOL...',
 
             'MYSTERIOUS BOY:',
-            'THERE IS SOMETHING',
+            'BUT THERE IS SOMETHING',
             'I MUST CONFESS TO YOU$',
 
             'ROBOTIC SCHOOLGIRL:' ,
-            'WAIT, WHO ARE YOU AGAIN?',
-            ' ',
+            'WAIT...',
+            'WHO ARE YOU AGAIN?',
 
+			'MYSTERIOUS BOY:',
+            'I AM YOUR CLASSMATE$',
+            'I HAVE WATCHED YOU FROM AFAR.',
+			
             'MYSTERIOUS BOY:',
             'MAY I SPEAK WITH YOU',
-            'IN THE HALLWAY?'
+            'IN THE HALLWAY?',
+			
+			'ROBOTIC SCHOOLGIRL:' ,
+            'UH... OK?',
+            ' ',
         ],
     },
     {
@@ -103,7 +107,7 @@ var bossData = [
         mouthOffsetY: 160,
         phases: 3,
         wordSpeed: 2.133,
-        wordSpawnRate: 550,
+        wordSpawnRate: 450,
         phrasePhases: [
             {
                 phrases: [
@@ -122,7 +126,6 @@ var bossData = [
                     'SHOOTING YOUR LOVE-LOVE BEAM AT A TEACHER!',
                     'SUCH RUDENESS IS UNBEFITTING OF A YOUNG LADY.',
                     'ILL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
-                    'DETENTION! MY OFFICE, TONIGHT.',
                 ],
                 answers: [
                     'UH... THATS NOT WHAT I MEANT!',
@@ -137,7 +140,6 @@ var bossData = [
                     'THEY ARE BEING TRAINED AS ROBO-SPIES.',
                     'WHY AM I TELLING YOU THIS?',
                     'IT IS SIMPLE.',
-                    'YOU WON\'T MAKE IT TO DETENTION TONIGHT, BABY.',
                     'YOUR STORY ENDS HERE.',
                 ],
                 answers: [
@@ -168,7 +170,7 @@ var bossData = [
                     'ERROR.',
                     'ERROR.',
                     'ERROR.',
-                    'NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO',
+                    'NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO',
                 ],
                 answers: [
                     'GOOD LORD.',
@@ -182,6 +184,10 @@ var bossData = [
         title: [
             'BAZOOKA-SENSEI:',
             'ROBO-CHAN, HOW ARE YO-',
+            'MY GOD!',
+			
+            'BAZOOKA-SENSEI:',
+            'YOU...',
             'YOU KILLED A STUDENT!',
 
             'ROBOTIC SCHOOLGIRL:',
@@ -203,10 +209,52 @@ var bossData = [
         phrasePhases: [
             {
                 phrases: [
-                    'I HOPE YOU CAN FIND SOMETHING USEFUL IN THIS DIALOG I JUST KIND OF MADE IT UP AS I WROTE THE WORDS THAT I THOUGHT WOULD EXPLAIN WHAT I WAS DOING',
+                    'YOU HAVE JUST DEFEATED TWO ROBOTS IN DISGUISE.',
+                    'THE ENTIRE SCHOOL HAS BEEN ALTERED TO YOUR PRESENCE.',
+                    'THERE IS NO WAY YOU CAN FIGHT THEM ALL, YOU MUST RUN.',
                 ],
                 answers: [
-                    "WHY?",
+                    "TIME TRAVEL? LIES!",
+                    "YOURE ONE OF THEM ARENT YOU!",
+                    "BETTER USE THE BEAM TO BE SURE.",
+                ],
+            },
+            {
+                phrases: [
+                    'OUCH!',
+                    'YOU IDOIT!',
+                    'OF COURSE THE BEAM WORKS ON ME.',
+                    'IM YOU, AND YOU, ARE A ROBOT.',
+                    'WILL YOU PLEASE JUST LISTEN TO ME FOR A MINUTE?',
+                ],
+                answers: [
+                    "MORE LIES!",
+                    "YOU ADMIT IT! YOU ARE A ROBOT!",
+                    "ENOUGH TALK.",
+                ],
+            },
+            {
+                phrases: [
+                    'GOD DAMNIT. THAT HURTS.',
+                    'IT IS IMPERATIVE THAT I TELL YOU HOW TO ESCAPE.',
+                    'THE ENTIRE SCHOOL IS ABOUT TO BE ON TOP OF US.',
+                ],
+                answers: [
+                    "ROBOT ORGY? GROSS!",
+                    "NEVER!",
+                    "DIE ROBOT DOG!",
+                ],
+            },
+            {
+                phrases: [
+                    'PLEASE! I CAN\T TAKE ANOTHER BEAM!',
+                    'YOU HAVE TO BELIEVE ME!',
+                    'THERE ISNT MUCH TIME!',
+                ],
+                answers: [
+                    "SILENCE ROBOT SPY!",
+                    "THIS IS THE END FOR YOU.",
+                    "NEVER TRUST A ROBOT.",
                 ],
             },
         ],
