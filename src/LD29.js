@@ -8,7 +8,7 @@ var bossData = [
         mouthOffsetY: 200,
         phases: 3,
         wordSpeed: 1.833,
-        wordSpawnRate: 1000,
+        wordSpawnRate: 750,
         phrasePhases: [
             {
                 phrases: [
@@ -202,10 +202,52 @@ var bossData = [
         phrasePhases: [
             {
                 phrases: [
-                    'I HOPE YOU CAN FIND SOMETHING USEFUL IN THIS DIALOG I JUST KIND OF MADE IT UP AS I WROTE THE WORDS THAT I THOUGHT WOULD EXPLAIN WHAT I WAS DOING',
+                    'YOU HAVE JUST DEFEATED TWO ROBOTS IN DISGUISE.',
+                    'THE ENTIRE SCHOOL HAS BEEN ALTERED TO YOUR PRESENCE.',
+                    'THERE IS NO WAY YOU CAN FIGHT THEM ALL, YOU MUST RUN.',
                 ],
                 answers: [
-                    "WHY?",
+                    "TIME TRAVEL? LIES!",
+                    "YOURE ONE OF THEM ARENT YOU!",
+                    "BETTER USE THE BEAM TO BE SURE.",
+                ],
+            },
+            {
+                phrases: [
+                    'OUCH!',
+                    'YOU IDOIT!',
+                    'OF COURSE THE BEAM WORKS ON ME.',
+                    'IM YOU, AND YOU, ARE A ROBOT.',
+                    'WILL YOU PLEASE JUST LISTEN TO ME FOR A MINUTE?',
+                ],
+                answers: [
+                    "MORE LIES!",
+                    "YOU ADMIT IT! YOU ARE A ROBOT!",
+                    "ENOUGH TALK.",
+                ],
+            },
+            {
+                phrases: [
+                    'GOD DAMNIT. THAT HURTS.',
+                    'IT IS IMPERATIVE THAT I TELL YOU HOW TO ESCAPE.',
+                    'THE ENTIRE SCHOOL IS ABOUT TO BE ON TOP OF US.',
+                ],
+                answers: [
+                    "ROBOT ORGY? GROSS!",
+                    "NEVER!",
+                    "DIE ROBOT DOG!",
+                ],
+            },
+            {
+                phrases: [
+                    'PLEASE! I CAN\T TAKE ANOTHER BEAM!',
+                    'YOU HAVE TO BELIEVE ME!',
+                    'THERE ISNT MUCH TIME!',
+                ],
+                answers: [
+                    "SILENCE ROBOT SPY!",
+                    "THIS IS THE END FOR YOU.",
+                    "NEVER TRUST A ROBOT.",
                 ],
             },
         ],
