@@ -221,7 +221,7 @@ var jsApp = {
         me.state.set( me.state.PLAY, new PlayScreen() );
         me.state.set( me.state.GAMEOVER, new GameOverScreen() );
 
-        me.state.change( me.state.PLAY );
+        me.state.change( me.state.INTRO );
     }
 };
 
@@ -1048,10 +1048,11 @@ var LevelScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        this.bg= new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
+		this.closing = false;
+		this.bg= new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
         this.bg.z = 0;
-
-        this.bossPortrait = new me.ObjectEntity( 500, 100, {
+		
+        this.bossPortrait = new me.ObjectEntity( 850, 100, {
             image: 'boss' + bossData[nextBoss].bossID + '_1',
             width: 350,
             height: 350,
@@ -1063,7 +1064,7 @@ var LevelScreen = me.ScreenObject.extend(
         this.bossPortrait.floating = true; // screen coords
         this.bossPortrait.z = 4;
 
-        this.playerPortrait = new me.ObjectEntity( -10, 100, {
+        this.playerPortrait = new me.ObjectEntity( -400, 100, {
             image: 'boss3_1',
             width: 350,
             height: 350,
@@ -1071,12 +1072,12 @@ var LevelScreen = me.ScreenObject.extend(
             spriteheight: 350,
         });
         this.playerPortrait.renderable.animationpause = true;
-
+		
         this.playerPortrait.floating = true; // screen coords
         this.playerPortrait.z = 4;
         this.playerPortrait.renderable.flipX( true );
 
-        this.textArea = new me.ObjectEntity( 170, 400, {
+        this.textArea = new me.ObjectEntity( 170, 400 + 300, {
             image: 'answer_box',
             width: 497,
             height: 121,
@@ -1086,10 +1087,18 @@ var LevelScreen = me.ScreenObject.extend(
         this.textArea.z = 5;
 
         this.levelText = new TitleText({
-            pos: new me.Vector2d( 180, 420 ),
+            pos: new me.Vector2d( 180, 420 + 300 ),
             text: bossData[nextBoss].title,
         });
-
+		
+		//onComplete(myFunc)
+		//.easing(me.Tween.Easing.Bounce.Out)
+		new me.Tween(this.playerPortrait.pos).to({x: -10}, 1000).start();
+		new me.Tween(this.bossPortrait.pos).to({x: 500}, 1000).start();
+		
+		new me.Tween(this.textArea.pos).to({y: 400}, 500).delay(800).start();
+		new me.Tween(this.levelText.pos).to({y: 420}, 500).delay(800).start(); 
+		
         me.game.world.addChild( this.playerPortrait );
         me.game.world.addChild( this.bossPortrait );
         me.game.world.addChild( this.bg );
@@ -1099,12 +1108,28 @@ var LevelScreen = me.ScreenObject.extend(
         this.subscription = me.event.subscribe( me.event.KEYDOWN, (function (action, keyCode, edge) {
             if( keyCode === me.input.KEY.ENTER ) {
                 if( !this.levelText.nextLine() ) {
-                    me.state.change( me.state.PLAY);
+                    if(!this.closing){
+						this.closing = true; 
+						this.closeAnimation();
+					}
+					//me.state.change( me.state.PLAY);
                 }
             }
         }).bind(this));
     },
-
+	
+	closeAnimation: function(){
+		new me.Tween(this.playerPortrait.pos).to({x: 850}, 1000).delay(300).start();
+		new me.Tween(this.bossPortrait.pos).to({x: 850 + 200}, 1000).delay(300).onComplete(this.closeAnimationComplete).start();
+		
+		new me.Tween(this.textArea.pos).to({y: 400 + 300}, 500).start();
+		new me.Tween(this.levelText.pos).to({y: 420 + 300}, 500).start(); 
+	},
+	
+	closeAnimationComplete: function(){
+		me.state.change( me.state.PLAY);
+	},
+	
     onDestroyEvent: function() {
         me.audio.stopTrack();
         me.game.world.removeChild( this.bg );
@@ -1221,6 +1246,7 @@ var TitleText = me.ObjectEntity.extend({
     {
         this.parent( args.pos.x, args.pos.y, {} );
         this.font = new me.BitmapFont("16x16_font", 16);
+		this.nameFont = new me.BitmapFont("16x16_font_white", 16);
         this.floating = true; // screen coords
         this.z = 7;
 
@@ -1229,7 +1255,7 @@ var TitleText = me.ObjectEntity.extend({
     },
 
     nextLine: function() {
-        if( this.line >= this.fullText.length ) {
+        if( this.line >= this.fullText.length-3 ) {
             return false;
         }
         this.line += 3;
@@ -1240,11 +1266,11 @@ var TitleText = me.ObjectEntity.extend({
     {
         for(var i = 0; i < 3; i ++ ) {
             if( this.fullText[this.line + i] ) {
-                this.font.draw(
+                (i > 0 ? this.font : this.nameFont ).draw(
                     context,
                     this.fullText[this.line + i],
-                    this.pos.x,
-                    this.pos.y + i * 20
+                    this.pos.x + 10,
+                    this.pos.y + i * 20 + (i>0 ? 10 : 0)
                 );
             }
         }
