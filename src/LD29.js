@@ -149,6 +149,38 @@ var bossData = [
                     'I MUST BREAK YOU.',
                 ],
             },
+			{
+                phrases: [
+                    'STILL YOU PERSIST?',
+                    'HAVE YOU LEARNED NOTHING?',
+                    'WE ARE THE SUPERIOR RACE OF ROBOTS.',
+                    'NOT YOU!',
+                    'NOTHING ON THIS PLANET CAN STOP US.',
+                    'YOUR ACTIONS ARE FUTILE!',
+                ],
+                answers: [
+                    'GIVE ME A BREAK...',
+                    'DOES HE EVER STOP TALKING?',
+                    'WITH RESPECT, SUCK IT.',
+                ],
+            },
+			{
+                phrases: [
+                    'ERROR.',
+                    'DOES NOT COMPUTE.',
+                    'ERROR.',
+                    'ERROR.',
+                    'ERROR.',
+                    'NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO',
+                ],
+                answers: [
+                    'GOOD LORD.',
+                    'MY BEAM, YOUR FACE.',
+                    'EAT A DICK',
+                ],
+            },
+			
+			
         ],
         title: [
             'BAZOOKA-SENSEI:',
@@ -191,8 +223,8 @@ var bossData = [
             '',
 
             'MYSTERIOUS ROBOTIC SCHOOLGIRL:',
+            'THERE ISN\'T MUCH TIME.'
             'I\'LL EXPLAIN IN THE HALLWAY.',
-            'QUICKLY, THERE ISN\'T MUCH TIME.'
         ],
     }
 ];
