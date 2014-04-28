@@ -49,6 +49,7 @@ var GameResources = [
     { name: "bg_wall", type: "image", src: "data/bg_wall.png" },
     { name: "introcta", type: "image", src: "data/introcta.png" },
     { name: "gameover", type: "image", src: "data/gameover.png" },
+    { name: "gamewin", type: "image", src: "data/gamewin.png" },
 
     { name: "16x16_font", type: "image", src: "data/16x16_font.png" },
     { name: "16x16_font_blue", type: "image", src: "data/16x16_font_blue.png" },

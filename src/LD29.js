@@ -1,5 +1,6 @@
 var screenHeight = 600;
 var screenWidth = 800;
+var goodEnd = false;
 
 var bossData = [
     {
@@ -796,12 +797,13 @@ var Boss = me.ObjectEntity.extend({
             window.setTimeout( function() {
                 nextBoss++;
                 if( bossData[nextBoss] ) {
-                    me.state.change( me.state.SETTINGS);
+                    me.state.change( me.state.SETTINGS );
                 }
                 else {
                     // TODO Game reset logic!
                     nextBoss = 0;
-                    me.state.change( me.state.GAME_OVER);
+                    goodEnd = true;
+                    me.state.change( me.state.GAMEOVER );
                 }
             }, 1000);
         }
@@ -1068,6 +1070,8 @@ var TitleScreen = me.ScreenObject.extend({
                 me.state.change( me.state.SETTINGS);
             }
         });
+
+        goodEnd = false;
     },
 
     onDestroyEvent: function() {
@@ -1213,7 +1217,24 @@ var GameOverScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-        this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight, "gameover");
+        this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight,
+            goodEnd ? "gamewin" : "gameover", 0);
+
+        this.hitenter = new HitEnter( 333, goodEnd ? 535 : 180 );
+        me.game.world.addChild( this.hitenter );
+
+        if( goodEnd ) {
+            this.logo = new me.ObjectEntity( 250, 434, {
+                image: 'title_title',
+                width: 299,
+                height: 78,
+            });
+            this.logo.floating = true; // screen coords
+            this.logo.z = 4;
+
+            me.game.world.addChild( this.logo );
+        }
+
         me.game.world.addChild( this.gameover );
         me.audio.stopTrack();
         me.audio.playTrack( "ld29-intro" );
