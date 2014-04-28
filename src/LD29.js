@@ -704,7 +704,7 @@ var HPBar = me.Renderable.extend({
         this.front = me.loader.getImage( args.image + "_hp_front" );
 
         this.floating = true; // screen coords
-        this.z = 1;
+        this.z = 10;
         this.hp = 0;
         this.barWidth = 1;
         this.barHeight = 38;
@@ -842,7 +842,8 @@ var Boss = me.ObjectEntity.extend({
         }
 
         if( this.hp <= 0 ) {
-            new me.Tween(this.pos).to({x: 800}, 2500).start();
+            this.dying = true;
+            new me.Tween(this.pos).to({y: 900}, 3000).start();
             window.setTimeout( function() {
                 nextBoss++;
                 if( bossData[nextBoss] ) {
@@ -943,9 +944,11 @@ var Boss = me.ObjectEntity.extend({
     {
         this.parent(dt);
 
+        if( this.dying ) return;
+
         this.locationTimer += dt;
         var progress = ( 1 + Math.sin( this.locationTimer / 4000 ) );
-        var range = (this.limits.bottom - this.limits.top) / 2
+        var range = (this.limits.bottom - this.limits.top) / 2;
         this.pos.y = progress * range + this.limits.top;
 
         if( this.attacking ) {
