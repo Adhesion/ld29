@@ -175,7 +175,7 @@ var bossData = [
                 answers: [
                     'GOOD LORD.',
                     'MY BEAM, YOUR FACE.',
-                    'EAT A DICK.',
+                    'EAT DEATH, ROBOT!',
                 ],
             },
 			
@@ -471,7 +471,7 @@ var Word = me.ObjectEntity.extend({
             }
 
             var note = Math.floor(Math.random() * 7) + 1;
-            me.audio.play( "type" + note, false, null, 0.3 );
+            me.audio.play( "type" + note, false, null, 0.25 );
         }
         else {
             me.audio.play( "miss" );
@@ -879,7 +879,7 @@ var Boss = me.ObjectEntity.extend({
 
         me.game.world.removeChild( word );
 
-        me.audio.play( "word", false, null, 0.3 );
+        me.audio.play( "word", false, null, 0.2 );
 
         this.activeWords = this.activeWords.filter( function(e) { return e != word } );
 
@@ -993,7 +993,7 @@ var Boss = me.ObjectEntity.extend({
         me.game.world.sort();
 
         var speech = Math.floor(Math.random() * 7) + 1;
-        me.audio.play( "speech" + this.bossID + "-" + speech, false, null, 0.8 );
+        me.audio.play( "speech" + this.bossID + "-" + speech, false, null, 0.5 );
     },
 
     setAttacking: function( attacking ) {
