@@ -215,8 +215,8 @@ var bossData = [
                 ],
                 answers: [
                     "TIME TRAVEL? LIES!",
-                    "YOU\'RE ONE OF THEM AREN\'T YOU!",
-                    "BETTER USE THE BEAM TO BE SURE.",
+                    "YOU\'RE ONE OF THEM!",
+                    "MY BEAM WILL EXPOSE YOU!",
                 ],
             },
             {

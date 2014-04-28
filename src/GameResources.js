@@ -19,6 +19,7 @@ var GameResources = [
     { name: "boss2_2", type: "image", src: "data/boss2_2.png" },
     { name: "boss2_3", type: "image", src: "data/boss2_3.png" },
     { name: "boss3_1", type: "image", src: "data/boss3_1.png" },
+    { name: "boss3_player", type: "image", src: "data/boss3_player.png" },
 
     { name: "player", type: "image", src: "data/player.png" },
     { name: "player_halo", type: "image", src: "data/player_halo.png" },
