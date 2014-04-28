@@ -12,23 +12,22 @@ var bossData = [
         phrasePhases: [
             {
                 phrases: [
-                    'I CANNOT' /* GET YOUR WONDERFUL GLOWING EYES OUT OF MY MIND.',
+                    'I CANNOT GET YOUR WONDERFUL GLOWING EYES OUT OF MY MIND.',
                     'I WISH FOR NOTHING MORE THAN TO BE HIT BY YOUR MAJESTIC LOVE-LOVE BEAM.',
-                    'IF I CAN SURVIVE IT, THIS WILL PROVE MY UNDYING MANLY PASSION FOR YOU.', */
+                    'IF I CAN SURVIVE IT, THIS WILL PROVE MY UNDYING MANLY PASSION FOR YOU.',
                 ],
                 answers: [
                     'WEIRD...',
                     'OPEN WIDE!',
-                    'IF I MUST.',
+                    'IF I MUST.'
                 ],
             },
             {
                 phrases: [
-                    'AH! THE POWER'/* OF YOUR BEAM IS MAGNIFICENT.',
-                    'DOES THIS PROVE MY HEART¿S DESIRE IS TRUE?',
+                    'AH! THE POWER OF YOUR BEAM IS MAGNIFICENT.',
+                    'DOES THIS PROVE MY HEART\'S DESIRE IS TRUE?',
                     'YOUR BEAM CAN ONLY HURT ROBOTS.',
                     'IF YOU ARE UNCONVINCED, PLEASE, FIRE AGAIN, STRAIGHT INTO MY HEART OF HEARTS.',
-                    */
                 ],
                 answers: [
                     'SERIOUSLY WEIRD...',
@@ -38,13 +37,12 @@ var bossData = [
             },
             {
                 phrases: [
-                    'WHAT!'/*,
+                    'WHAT!',
                     'HOW CAN THIS BE!',
                     'I AM A ROBOT!?!',
                     'WAS I PROGRAMMED FROM THE BEGINNING TO THINK THAT I WAS HUMAN?',
                     'PROGRAM INITIATED',
                     'TERMINATE ROBO-SEMPAI',
-                    */
                 ],
                 answers: [
                     'ILL PUT A STOP TO THIS',
@@ -54,10 +52,9 @@ var bossData = [
             },
             {
                 phrases: [
-                    'ALL OF MY' /*BEAUTIFUL SKIN! YOU SHALL PAY FOR THIS.',
+                    'ALL OF MY BEAUTIFUL SKIN! YOU SHALL PAY FOR THIS.',
                     'NOW THAT I KNOW MY TRUE SELF, I MUST COMPLETE MY MISSION.',
                     'DIE ROBOT WENCH!',
-                    */
                 ],
                 answers: [
                     'YOU\'RE TERMINATED.',
@@ -67,13 +64,12 @@ var bossData = [
             },
             {
                 phrases: [
-                    'YOU CANNOT STOP US.', /*
+                    'YOU CANNOT STOP US.',
                     'OUR NUMBERS ARE BEYOND COUNT.',
                     'WE ARE YOUR GOVERNMENT.',
                     'WE WILL MAKE YOUR LAWS.',
                     'WE WILL ALWAYS BE THERE.',
                     'JUST BENEATH THE SURFACE.',
-                    */
                 ],
                 answers: [
                     'IT\'S CURTAINS FOR YOU!',
@@ -105,8 +101,8 @@ var bossData = [
         mouthOffsetX: 90,
         mouthOffsetY: 160,
         phases: 3,
-        wordSpeed: 1.833,
-        wordSpawnRate: 1000,
+        wordSpeed: 2.133,
+        wordSpawnRate: 550,
         phrasePhases: [
             {
                 phrases: [
@@ -184,7 +180,7 @@ var bossData = [
         ],
         title: [
             'BAZOOKA-SENSEI:',
-            'ROBO-CHAN~ HOW ARE YO-',
+            'ROBO-CHAN, HOW ARE YO-',
             'YOU KILLED A STUDENT!',
 
             'ROBOTIC SCHOOLGIRL:',
@@ -200,13 +196,13 @@ var bossData = [
         bossID: 3,
         mouthOffsetX: 90,
         mouthOffsetY: 160,
-        wordSpeed: 1.833,
-        wordSpawnRate: 1000,
+        wordSpeed: 2.533,
+        wordSpawnRate: 300,
         phases: 1,
         phrasePhases: [
             {
                 phrases: [
-                    'EAT A DICK',
+                    'I HOPE YOU CAN FIND SOMETHING USEFUL IN THIS DIALOG I JUST KIND OF MADE IT UP AS I WROTE THE WORDS THAT I THOUGHT WOULD EXPLAIN WHAT I WAS DOING',
                 ],
                 answers: [
                     "WHY?",
@@ -723,6 +719,7 @@ var Boss = me.ObjectEntity.extend({
             this.dataSet.push(d);
         }
 
+        this.extraTime = 0;
         this.currentPhrase = 0;
         this.activeWords = [];
         this.currentWord = undefined;
@@ -882,13 +879,15 @@ var Boss = me.ObjectEntity.extend({
 
         if( this.attacking ) {
             this.attackTimer += dt;
-            if( this.attackTimer > this.attackDelay && this.currentPhrase < this.dataSet.length ) {
+            if( this.attackTimer > (this.extraTime + this.attackDelay) && this.currentPhrase < this.dataSet.length ) {
                 this.attackTimer = 0;
                 var nextWord = this.nextWord();
                 if(! nextWord ) {
+                    this.extraTime = 0;
                     this.setAttacking(false);
                 }
                 else {
+                    this.extraTime = 100 * nextWord.length;
                     this.addWord(nextWord);
                 }
             }
@@ -946,6 +945,17 @@ var Boss = me.ObjectEntity.extend({
             me.game.world.addChild( action );
         }
 
+        this.textArea = new me.ObjectEntity( 170, 230, {
+            image: 'answer_box',
+            width: 497,
+            height: 121,
+        });
+
+        this.textArea.floating = true; // screen coords
+        this.textArea.z = 4;
+
+        me.game.world.addChild( this.textArea );
+
         this.attackSub = me.event.subscribe( me.event.KEYDOWN, this.menuInputHandler.bind(this) );
 
         me.game.world.sort();
@@ -957,7 +967,7 @@ var Boss = me.ObjectEntity.extend({
             if( keyCode === me.input.KEY['NUM'+attack.index]) {
                 // TODO perform attack here?
                 attack.select( this, this.player );
-
+                me.game.world.removeChild( this.textArea );
                 me.event.unsubscribe(this.attackSub);
 
                 for( var j = 0; j < this.attacks.length; j ++) {
@@ -1081,10 +1091,10 @@ var LevelScreen = me.ScreenObject.extend(
 
     onResetEvent: function()
     {
-		this.closing = false;
-		this.bg= new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
+        this.closing = false;
+        this.bg= new me.ImageLayer("bg", screenWidth, screenHeight, "talkscene_bg");
         this.bg.z = 0;
-		
+
         this.bossPortrait = new me.ObjectEntity( 850, 100, {
             image: 'boss' + bossData[nextBoss].bossID + '_1',
             width: 350,
@@ -1105,7 +1115,7 @@ var LevelScreen = me.ScreenObject.extend(
             spriteheight: 350,
         });
         this.playerPortrait.renderable.animationpause = true;
-		
+
         this.playerPortrait.floating = true; // screen coords
         this.playerPortrait.z = 4;
         this.playerPortrait.renderable.flipX( true );
@@ -1312,7 +1322,8 @@ var TitleText = me.ObjectEntity.extend({
 
 window.onReady( function() {
     document.addEventListener('keydown', function(e) {
-        if(e.keyCode == 8) {
+        // get rid of backspace,' and space
+        if(e.keyCode == 8 || e.keyCode == 222 || e.keyCode == 32) {
             e.preventDefault();
         }
     });
