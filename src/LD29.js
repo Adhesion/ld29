@@ -14,7 +14,7 @@ var bossData = [
             {
                 phrases: [
                     'I CANNOT GET YOUR WONDERFUL GLOWING EYES OUT OF MY MIND.',
-                    'I WISH FOR NOTHING MORE THAN TO BE HIT BY YOUR MAJESTIC LOVE-LOVE BEAM.',
+                    'I WISH FOR NOTHING MORE THAN TO BE HIT BY YOUR MAJESTIC LOVE$LOVE BEAM.',
                     'IF I SURVIVE, MY UNDYING MANLY PASSION FOR YOU WILL BE PROVEN.',
                 ],
                 answers: [
@@ -123,7 +123,7 @@ var bossData = [
             {
                 phrases: [
                     'AH!',
-                    'SHOOTING YOUR LOVE-LOVE BEAM AT A TEACHER!',
+                    'SHOOTING YOUR LOVE$LOVE BEAM AT A TEACHER!',
                     'SUCH RUDENESS IS UNBEFITTING OF A YOUNG LADY.',
                     'I\'LL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
                 ],
