@@ -135,7 +135,7 @@ var bossData = [
             },
             {
                 phrases: [
-                    'DAMN! YOU\'VE FOUND OUT MY SECRET.',
+                    'BLAST! YOU\'VE FOUND OUT MY SECRET.',
                     'I TOO, AM A ROBOT. IN FACT, ALL THE STUDENTS AT THIS SCHOOL ARE.',
                     'THEY ARE BEING TRAINED AS ROBO-SPIES.',
                     'WHY AM I TELLING YOU THIS?',
