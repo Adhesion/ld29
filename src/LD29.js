@@ -302,7 +302,7 @@ var Attack = me.ObjectEntity.extend({
         this.selectedFont = new me.BitmapFont("16x16_font_blue", 16);
         this.index = args.index;
         this.name = args.name;
-        this.text = "" + this.index + " - " + args.name;
+        this.text = "" + this.index + ". " + args.name;
         this.action = args.action;
         this.player = args.player;
         this.boss = args.boss;
@@ -558,6 +558,7 @@ var Player = me.ObjectEntity.extend({
     },
 
     hit: function() {
+		//me.game.viewport.shake(10, 1000, me.game.viewport.AXIS.VERTICAL);
         this.renderable.setCurrentAnimation("Damage", "Floaty");
         this.hp -= 10;
         if( this.hp <= 0 ) {
@@ -1098,7 +1099,7 @@ var LevelScreen = me.ScreenObject.extend(
 		
 		new me.Tween(this.textArea.pos).to({y: 400}, 500).delay(800).start();
 		new me.Tween(this.levelText.pos).to({y: 420}, 500).delay(800).start(); 
-		
+				
         me.game.world.addChild( this.playerPortrait );
         me.game.world.addChild( this.bossPortrait );
         me.game.world.addChild( this.bg );
@@ -1270,7 +1271,7 @@ var TitleText = me.ObjectEntity.extend({
                     context,
                     this.fullText[this.line + i],
                     this.pos.x + 10,
-                    this.pos.y + i * 20 + (i>0 ? 10 : 0)
+                    this.pos.y + i * 25 + (i>0 ? 10 : 0)
                 );
             }
         }
