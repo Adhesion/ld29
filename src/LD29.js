@@ -159,7 +159,7 @@ var bossData = [
                 ],
                 answers: [
                     'GIVE ME A BREAK...',
-                    'DOES YOU EVER STOP TALKING?',
+                    'DO YOU EVER STOP TALKING?',
                     'WITH RESPECT, SUCK IT.',
                 ],
             },
