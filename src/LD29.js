@@ -184,7 +184,7 @@ var bossData = [
         title: [
             'MYSTERIOUS ROBOTIC SCHOOLGIRL:',
             'IM YOU FROM THE FUTURE.',
-            'SOMETHING TERRIBLE WILL HAPPEN.',
+            'SOMETHING AWFUL WILL HAPPEN.',
 
             'ROBOTIC SCHOOLGIRL:',
             'WHAT THE SHIT?',
