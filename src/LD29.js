@@ -1012,7 +1012,7 @@ var Boss = me.ObjectEntity.extend({
                     boss.hit( dmg );
                 },
                 y: i * 32 + 250,
-                x: 250
+                x: 190
             });
             this.attacks.push(action);
             me.game.world.addChild( action );
