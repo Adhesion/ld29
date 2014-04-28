@@ -465,7 +465,7 @@ var Word = me.ObjectEntity.extend({
             this.dirty = true;
             // TODO: Punctuation...
             var m;
-            while( m = this.untypedText.match(/^([.\-\!\?\,\'])/) ) {
+            while( m = this.untypedText.match(/^([.\-\!\?\,\'\$])/) ) {
                 this.typedText += m[1];
                 this.untypedText = this.untypedText.substring(1);
             }
