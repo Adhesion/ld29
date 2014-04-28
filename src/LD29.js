@@ -842,6 +842,7 @@ var Boss = me.ObjectEntity.extend({
         }
 
         if( this.hp <= 0 ) {
+            new me.Tween(this.pos).to({x: 800}, 2500).start();
             window.setTimeout( function() {
                 nextBoss++;
                 if( bossData[nextBoss] ) {
@@ -853,7 +854,7 @@ var Boss = me.ObjectEntity.extend({
                     goodEnd = true;
                     me.state.change( me.state.GAMEOVER );
                 }
-            }, 1000);
+            }, 3000);
         }
     },
 
