@@ -1191,7 +1191,7 @@ var LevelScreen = me.ScreenObject.extend(
         this.bossPortrait.z = 4;
 
         this.playerPortrait = new me.ObjectEntity( -400, 100, {
-            image: 'boss3_1',
+            image: 'boss3_player',
             width: 350,
             height: 350,
             spritewidth: 350,
