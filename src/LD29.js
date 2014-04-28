@@ -115,8 +115,8 @@ var bossData = [
                     'ROBO-CHAN, COME WITH ME! WE\'RE GOING TO THE ADMINISTRATOR\'S OFFICE.',
                 ],
                 answers: [
-                    'YOU MUST BE ONE OF THEM TOO!',
-                    'YOU\'LL NEVER TAKE ME ALIVE!',
+                    'YOU MUST BE ONE OF THEM!',
+                    'HANDS OFF!',
                     'I\'M SORRY... SENSEI.',
                 ],
             },
@@ -125,7 +125,7 @@ var bossData = [
                     'AH!',
                     'SHOOTING YOUR LOVE$LOVE BEAM AT A TEACHER!',
                     'SUCH RUDENESS IS UNBEFITTING OF A YOUNG LADY.',
-                    'I\'LL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
+                    'I\'LL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY$',
                 ],
                 answers: [
                     'UH...',
