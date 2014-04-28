@@ -14,7 +14,7 @@ var bossData = [
             {
                 phrases: [
                     'I CANNOT GET YOUR WONDERFUL GLOWING EYES OUT OF MY MIND.',
-                    'I WISH FOR NOTHING MORE THAN TO BE HIT BY YOUR MAJESTIC LOVE-LOVE BEAM.',
+                    'I WISH FOR NOTHING MORE THAN TO BE HIT BY YOUR MAJESTIC LOVE$LOVE BEAM.',
                     'IF I SURVIVE, MY UNDYING MANLY PASSION FOR YOU WILL BE PROVEN.',
                 ],
                 answers: [
@@ -123,7 +123,7 @@ var bossData = [
             {
                 phrases: [
                     'AH!',
-                    'SHOOTING YOUR LOVE-LOVE BEAM AT A TEACHER!',
+                    'SHOOTING YOUR LOVE$LOVE BEAM AT A TEACHER!',
                     'SUCH RUDENESS IS UNBEFITTING OF A YOUNG LADY.',
                     'I\'LL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
                 ],
@@ -175,7 +175,7 @@ var bossData = [
                 answers: [
                     'GOOD LORD.',
                     'MY BEAM, YOUR FACE.',
-                    'EAT A DICK.',
+                    'EAT DEATH, ROBOT!',
                 ],
             },
 			
@@ -465,13 +465,13 @@ var Word = me.ObjectEntity.extend({
             this.dirty = true;
             // TODO: Punctuation...
             var m;
-            while( m = this.untypedText.match(/^([.\-\!\?\,\'])/) ) {
+            while( m = this.untypedText.match(/^([.\-\!\?\,\'\$])/) ) {
                 this.typedText += m[1];
                 this.untypedText = this.untypedText.substring(1);
             }
 
             var note = Math.floor(Math.random() * 7) + 1;
-            me.audio.play( "type" + note, false, null, 0.3 );
+            me.audio.play( "type" + note, false, null, 0.25 );
         }
         else {
             me.audio.play( "miss" );
@@ -879,7 +879,7 @@ var Boss = me.ObjectEntity.extend({
 
         me.game.world.removeChild( word );
 
-        me.audio.play( "word", false, null, 0.3 );
+        me.audio.play( "word", false, null, 0.2 );
 
         this.activeWords = this.activeWords.filter( function(e) { return e != word } );
 
@@ -993,7 +993,7 @@ var Boss = me.ObjectEntity.extend({
         me.game.world.sort();
 
         var speech = Math.floor(Math.random() * 7) + 1;
-        me.audio.play( "speech" + this.bossID + "-" + speech, false, null, 0.8 );
+        me.audio.play( "speech" + this.bossID + "-" + speech, false, null, 0.5 );
     },
 
     setAttacking: function( attacking ) {
