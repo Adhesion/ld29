@@ -31,7 +31,7 @@ var bossData = [
                 ],
                 answers: [
                     'SERIOUSLY WEIRD...',
-                    'ANYTHING FOR YOU',
+                    'ANYTHING FOR YOU$',
                     'BEAMMMMMMMM!',
                 ],
             },
@@ -50,7 +50,7 @@ var bossData = [
             },
             {
                 phrases: [
-                    'ALL OF MY BEAUTIFUL SKIN!',
+                    'MY BEAUTIFUL SKIN!',
 					'YOU SHALL PAY FOR THIS.',
                     'DIE ROBOT WENCH!',
                 ],
@@ -76,20 +76,28 @@ var bossData = [
         ],
         title: [
             'MYSTERIOUS BOY:',
-            'ROBO-SEMPAI, YOU JUST',
-            'TRANSFERRED TO THIS SCHOOL',
+            'ROBO-SEMPAI, I KNOW YOU JUST',
+            'TRANSFERRED TO THIS SCHOOL...',
 
             'MYSTERIOUS BOY:',
-            'THERE IS SOMETHING',
+            'BUT THERE IS SOMETHING',
             'I MUST CONFESS TO YOU$',
 
             'ROBOTIC SCHOOLGIRL:' ,
-            'WAIT, WHO ARE YOU AGAIN?',
-            ' ',
+            'WAIT...',
+            'WHO ARE YOU AGAIN?',
 
+			'MYSTERIOUS BOY:',
+            'I AM YOUR CLASSMATE$',
+            'I HAVE WATCHED YOU FROM AFAR.',
+			
             'MYSTERIOUS BOY:',
             'MAY I SPEAK WITH YOU',
-            'IN THE HALLWAY?'
+            'IN THE HALLWAY?',
+			
+			'ROBOTIC SCHOOLGIRL:' ,
+            'UH... OK?',
+            ' ',
         ],
     },
     {
