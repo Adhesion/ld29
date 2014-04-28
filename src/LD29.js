@@ -224,7 +224,7 @@ var bossData = [
                     'OUCH!',
                     'YOU IDIOT!',
                     'OF COURSE THE BEAM WORKS ON ME.',
-                    'I\'M YOU! WE\'RE BOTH ROBOTS!.',
+                    'I\'M YOU! WE\'RE BOTH ROBOTS!',
                     'WILL YOU PLEASE JUST LISTEN TO ME FOR A MINUTE?',
                 ],
                 answers: [
