@@ -650,6 +650,7 @@ var Player = me.ObjectEntity.extend({
         this.renderable.setCurrentAnimation("Damage", "Floaty");
         this.hp -= 10;
         me.audio.play( "hit" );
+        me.game.viewport.shake( 100, 100 );
         if( this.hp <= 0 ) {
             // TODO Game reset logic!
             nextBoss = 0;
@@ -822,6 +823,7 @@ var Boss = me.ObjectEntity.extend({
     hit: function( dmg )
     {
         this.hp -= dmg;
+
         var currentImage = this.renderable.image;
         this.renderable.image = me.loader.getImage(this.getBossImageName());
 
@@ -842,6 +844,7 @@ var Boss = me.ObjectEntity.extend({
         }
 
         if( this.hp <= 0 ) {
+            me.game.viewport.shake( 60, 3000 );
             this.dying = true;
             new me.Tween(this.pos).to({y: 900}, 3000).start();
             window.setTimeout( function() {
@@ -856,6 +859,9 @@ var Boss = me.ObjectEntity.extend({
                     me.state.change( me.state.GAMEOVER );
                 }
             }, 3000);
+        }
+        else {
+            me.game.viewport.shake( 30, 100 );
         }
     },
 
