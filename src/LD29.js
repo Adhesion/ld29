@@ -128,7 +128,7 @@ var bossData = [
                     'I\'LL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
                 ],
                 answers: [
-                    'UH... THAT\'S NOT WHAT I MEANT!',
+                    'UH...',
                     'ONE MORE TIME TO BE SURE.',
                     'CREEPY.',
                 ],
@@ -144,7 +144,7 @@ var bossData = [
                 ],
                 answers: [
                     'SUCK BEAM, CREEP!',
-                    'I WAS MADE TO DEFEAT ROBOTS!',
+                    'YOU\'RE GOING DOWN!',
                     'I MUST BREAK YOU.',
                 ],
             },
@@ -159,7 +159,7 @@ var bossData = [
                 ],
                 answers: [
                     'GIVE ME A BREAK...',
-                    'DOES HE EVER STOP TALKING?',
+                    'DOES YOU EVER STOP TALKING?',
                     'WITH RESPECT, SUCK IT.',
                 ],
             },
@@ -229,7 +229,7 @@ var bossData = [
                 ],
                 answers: [
                     "MORE LIES!",
-                    "YOU ADMIT IT! YOU ARE A ROBOT!",
+                    "YOU ARE A ROBOT! ADMIT IT!",
                     "ENOUGH TALK.",
                 ],
             },
