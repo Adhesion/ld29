@@ -44,8 +44,8 @@ var bossData = [
                     'TERMINATE ROBO-SEMPAI',
                 ],
                 answers: [
-                    'ILL PUT A STOP TO THIS',
-                    'I\'M SORRY MY FRIEND',
+                    'I\'LL PUT A STOP TO THIS!',
+                    'I\'M SORRY MY FRIEND...',
                     'IT\'S NOT ME, IT\'S YOU.',
                 ],
             },
@@ -111,8 +111,8 @@ var bossData = [
         phrasePhases: [
             {
                 phrases: [
-                    'I KNEW WE SHOULD NOT HAVE ADMITTED AN ANDROID TO THIS SCHOOL.',
-                    'ROBO-CHAN, COME WITH ME! WE\'RE GOING TO THE ADMINISTRATORS OFFICE.',
+                    'I KNEW WE SHOULD NOT HAVE ADMITTED A ROBOT TO THIS SCHOOL.',
+                    'ROBO-CHAN, COME WITH ME! WE\'RE GOING TO THE ADMINISTRATOR\'S OFFICE.',
                 ],
                 answers: [
                     'YOU MUST BE ONE OF THEM TOO!',
@@ -125,10 +125,10 @@ var bossData = [
                     'AH!',
                     'SHOOTING YOUR LOVE-LOVE BEAM AT A TEACHER!',
                     'SUCH RUDENESS IS UNBEFITTING OF A YOUNG LADY.',
-                    'ILL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
+                    'I\'LL HAVE TO TEACH YOU SOME MANNERS, PERSONALLY.',
                 ],
                 answers: [
-                    'UH... THATS NOT WHAT I MEANT!',
+                    'UH... THAT\'S NOT WHAT I MEANT!',
                     'ONE MORE TIME TO BE SURE.',
                     'CREEPY.',
                 ],
@@ -136,7 +136,7 @@ var bossData = [
             {
                 phrases: [
                     'DAMN! YOU\'VE FOUND OUT MY SECRET.',
-                    'I TOO, AM A ROBOT. IN FACT, ALL THE STUDENTS HERE AT THIS SCHOOL ARE.',
+                    'I TOO, AM A ROBOT. IN FACT, ALL THE STUDENTS AT THIS SCHOOL ARE.',
                     'THEY ARE BEING TRAINED AS ROBO-SPIES.',
                     'WHY AM I TELLING YOU THIS?',
                     'IT IS SIMPLE.',
@@ -170,12 +170,12 @@ var bossData = [
                     'ERROR.',
                     'ERROR.',
                     'ERROR.',
-                    'NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO',
+                    'NO NO NO NO NO NO NO',
                 ],
                 answers: [
                     'GOOD LORD.',
                     'MY BEAM, YOUR FACE.',
-                    'EAT A DICK',
+                    'EAT A DICK.',
                 ],
             },
 			
@@ -215,16 +215,16 @@ var bossData = [
                 ],
                 answers: [
                     "TIME TRAVEL? LIES!",
-                    "YOURE ONE OF THEM ARENT YOU!",
+                    "YOU\'RE ONE OF THEM AREN\'T YOU!",
                     "BETTER USE THE BEAM TO BE SURE.",
                 ],
             },
             {
                 phrases: [
                     'OUCH!',
-                    'YOU IDOIT!',
+                    'YOU IDIOT!',
                     'OF COURSE THE BEAM WORKS ON ME.',
-                    'IM YOU, AND YOU, ARE A ROBOT.',
+                    'I\'M YOU! WE\'RE BOTH ROBOTS!.',
                     'WILL YOU PLEASE JUST LISTEN TO ME FOR A MINUTE?',
                 ],
                 answers: [
@@ -247,9 +247,9 @@ var bossData = [
             },
             {
                 phrases: [
-                    'PLEASE! I CAN\T TAKE ANOTHER BEAM!',
+                    'PLEASE! I CAN\'T TAKE ANOTHER BEAM!',
                     'YOU HAVE TO BELIEVE ME!',
-                    'THERE ISNT MUCH TIME!',
+                    'THERE ISN\'T MUCH TIME!',
                 ],
                 answers: [
                     "SILENCE ROBOT SPY!",
@@ -260,11 +260,11 @@ var bossData = [
         ],
         title: [
             'MYSTERIOUS ROBOTIC SCHOOLGIRL:',
-            'IM YOU FROM THE FUTURE.',
+            'I\'M YOU FROM THE FUTURE.',
             'SOMETHING AWFUL WILL HAPPEN.',
 
             'ROBOTIC SCHOOLGIRL:',
-            'WHAT THE SHIT?',
+            'NANI?!',
             '',
 
             'MYSTERIOUS ROBOTIC SCHOOLGIRL:',
