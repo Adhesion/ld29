@@ -219,7 +219,7 @@ var bossData = [
             '',
 
             'MYSTERIOUS ROBOTIC SCHOOLGIRL:',
-            'THERE ISN\'T MUCH TIME.'
+            'THERE ISN\'T MUCH TIME.',
             'I\'LL EXPLAIN IN THE HALLWAY.',
         ],
     }
