@@ -210,7 +210,7 @@ var bossData = [
             {
                 phrases: [
                     'YOU HAVE JUST DEFEATED TWO ROBOTS IN DISGUISE.',
-                    'THE ENTIRE SCHOOL HAS BEEN ALTERED TO YOUR PRESENCE.',
+                    'THE ENTIRE SCHOOL HAS BEEN ALERTED TO YOUR PRESENCE.',
                     'THERE IS NO WAY YOU CAN FIGHT THEM ALL, YOU MUST RUN.',
                 ],
                 answers: [
