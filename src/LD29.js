@@ -1268,10 +1268,10 @@ var GameOverScreen = me.ScreenObject.extend(
         this.gameover = new me.ImageLayer("gameover", screenWidth, screenHeight,
             goodEnd ? "gamewin" : "gameover", 0);
 
-        this.hitenter = new HitEnter( 333, goodEnd ? 535 : 180 );
+        this.hitenter = new HitEnter( 333, goodEnd ? 535 : 535 );
         me.game.world.addChild( this.hitenter );
 
-        if( goodEnd ) {
+       // if( goodEnd ) {
             this.logo = new me.ObjectEntity( 250, 434, {
                 image: 'title_title',
                 width: 299,
@@ -1281,7 +1281,7 @@ var GameOverScreen = me.ScreenObject.extend(
             this.logo.z = 4;
 
             me.game.world.addChild( this.logo );
-        }
+        //}
 
         me.game.world.addChild( this.gameover );
         me.audio.stopTrack();
