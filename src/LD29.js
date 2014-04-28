@@ -32,7 +32,7 @@ var bossData = [
                 ],
                 answers: [
                     'SERIOUSLY WEIRD...',
-                    'ANYTHING FOR YOU$',
+                    'ANYTHING FOR YOU $',
                     'BEAMMMMMMMM!',
                 ],
             },
@@ -56,9 +56,9 @@ var bossData = [
                     'DIE ROBOT WENCH!',
                 ],
                 answers: [
-                    'YOU\'RE TERMINATED.',
-                    'SEEYA LATER, ALLIGATOR.',
-                    'DIE ROBOT SCUM!',
+                    'ROBOT WENCH!?!',
+                    'SNAP OUT OF IT!',
+                    'THE BEAM IS THE ONLY WAY.',
                 ],
             },
             {
