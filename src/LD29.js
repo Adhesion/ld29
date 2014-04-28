@@ -89,7 +89,7 @@ var bossData = [
             'WHO ARE YOU AGAIN?',
 
 			'MYSTERIOUS BOY:',
-            'I AM YOUR CLASSMATE$',
+            'I AM ONE YEAR BELOW YOU$',
             'I HAVE WATCHED YOU FROM AFAR.',
 			
             'MYSTERIOUS BOY:',
