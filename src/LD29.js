@@ -1422,13 +1422,35 @@ var TitleText = me.ObjectEntity.extend({
     }
 });
 
+// straight from mdn
+function getQueryStringValue(key) {
+    return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));
+}
+
+function setAudioState( enabled ) {
+    if( enabled) {
+        me.audio.enable();
+    }
+    else {
+        me.audio.disable();
+    }
+    return enabled;
+}
+
+
 window.onReady( function() {
+    var audio = document.getElementById('audioEnabled');
+    // get rid of backspace, ' and space, etc
     document.addEventListener('keydown', function(e) {
-        // get rid of backspace,' and space
         if(e.keyCode == 8 || e.keyCode == 222 || e.keyCode == 32) {
             e.preventDefault();
         }
     });
 
     jsApp.onload();
+
+    // Give controls to turn audio on or off.
+    audio.checked = setAudioState( getQueryStringValue('audioEnabled') != 'false' );
+    audio.addEventListener( 'change', function() { setAudioState( this.checked ) } );
+
 });
